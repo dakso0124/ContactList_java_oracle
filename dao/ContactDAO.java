@@ -49,6 +49,21 @@ public class ContactDAO // db access object
 			e.printStackTrace();
 		}
 	}
+	
+	private void close(Connection conn, PreparedStatement pstmt)
+	{
+		try
+		{
+			if (pstmt != null)
+				pstmt.close();
+			if (conn != null)
+				conn.close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
 
 	//region - Create Table
 	// 만약 첫 실행이라 테이블이 없다면 테이블들 생성 및 제약조건 지정
@@ -223,6 +238,65 @@ public class ContactDAO // db access object
 		}
 	}
 	// endregion
+	
+	// region ALTER TABLE
+		// insert table 
+	public int addRelationType(String typeName)
+	{
+		int result = 0;
+		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("INSERT INTO RELATION										");
+		sql.append("values(														");
+		sql.append("			LPAD( (SELECT NVL(MAX(relation_type), '000' )	"); 
+		sql.append("					 FROM relation)+1, 3, 0), ?				");
+		sql.append("	   )													");
+		
+		
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, typeName);
+			result = pstmt.executeUpdate();
+			
+			if(result > 0)
+			{
+				System.out.println("타입이 정상적으로 추가되었습니다.");
+			}
+			else
+			{
+				System.out.println("타입추가에 실패했습니다.");
+			}
+		}
+		catch (SQLTimeoutException e)
+		{
+			System.out.println("TimeOut Exception");
+		}
+		catch (SQLException e)
+		{
+			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+		}
+		finally
+		{
+			close(conn, pstmt);
+		}
+		
+		return result;
+	}
+		
+//	public int removeRelationTypeColumn(String typeName)
+//	{
+//		int result = 0;
+//		
+//		
+//		
+//		return result;
+//	}
+	// endregion ALTER TABLE
 
 	// 연락처 전체 보기
 	public ArrayList<ContactInfoVO> showAll()
