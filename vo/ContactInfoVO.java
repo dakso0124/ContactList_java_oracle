@@ -19,6 +19,15 @@ public class ContactInfoVO
 		relation_name	= null;
 	}
 	
+	public ContactInfoVO(String name, String phone, String address, String join_date, String relationType)
+	{
+		this.name 			= name;
+		this.phone			= phone;
+		this.address       	= address;
+		this.join_date		= join_date;
+		this.relation_type	= relationType;
+	}
+	
 	public ContactInfoVO(String name, String phone, String address, String join_date, String relationType, String relation_name)
 	{
 		this.name 			= name;
