@@ -3,6 +3,9 @@ package controller;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import service.ContactListService;
+import vo.ContactInfoVO;
+
 public class ContactController
 {
  	private Scanner m_scanner;
@@ -26,7 +29,7 @@ public class ContactController
 				switch(temp)
 				{
 				case "1":
-					searchMember();
+					searchContact();
 					break;
 					
 				case "2":
@@ -64,7 +67,7 @@ public class ContactController
 		}
 	}
 	
-	private void searchMember()
+	private void searchContact()
 	{
 		String temp = null;
 		
@@ -72,25 +75,41 @@ public class ContactController
 		
 		while(true)
 		{
-			System.out.print("1. 연락처 전체 보기\n2. 연락처 검색\n3. 이전 메뉴로");
-			temp = m_scanner.nextLine();
-			
-			switch(temp)
+			try
 			{
-				case "1":
-					searchAll();
-					break;
+				System.out.print("1. 연락처 전체 보기\n2. 연락처 검색\n3. 이전 메뉴로");
+				temp = m_scanner.nextLine();
 				
-				case "2":
-					searchContact();
-					break;
+				switch(temp)
+				{
+					case "1":
+						searchAll();
+						break;
 					
-				case "3":
-					break;
-					
-				default:
-					System.out.println("메뉴를 확인하시고 원하는 숫자를 입력해 주세요.");
-					break;
+					case "2":
+						searchContactByName();
+						break;
+						
+					case "3":
+						System.out.println("이전 메뉴로 돌아갑니다.");
+						return;
+						
+					default:
+						System.out.println("메뉴를 확인하시고 원하는 숫자를 입력해 주세요.");
+						break;
+				}
+				
+				break;
+			}
+			catch(NoSuchElementException e)
+			{
+				e.printStackTrace();
+				System.out.println("");
+			}
+			catch(IllegalStateException e)
+			{
+				e.printStackTrace();
+				System.out.println("");
 			}
 		}
 	}
@@ -100,7 +119,7 @@ public class ContactController
 		
 	}
 	
-	private void searchContact()
+	private void searchContactByName()
 	{
 		String temp = null;
 		System.out.println("연락처를 검색합니다.");
@@ -116,8 +135,17 @@ public class ContactController
 				return;
 			}
 			
-			
+			break;
 		}
+	}
+	
+	private ContactInfoVO searchContactByName(String name)
+	{
+		ContactInfoVO result = new ContactInfoVO();
+		
+		
+		
+		return result;
 	}
 	
 	private void addContact()
@@ -154,7 +182,25 @@ public class ContactController
 					System.out.print("관계를 선택하세요 (추가하시려면 0을 입력하세요.) : ");
 					relation = m_scanner.nextLine();
 					
+					if(relation.equals("0"))
+					{
+						// add relation row
+					}
+					else if(true)
+					//else if(relation.matches("^01(?:1)()(\\d{3}|\\d{4})(\\d{4})$"))
+					{
+						
+					}
+					else
+					{
+						continue;
+					}
+						 
+					
+					break;
 				}
+				
+				
 			}
 			catch(NoSuchElementException e)
 			{
@@ -177,6 +223,17 @@ public class ContactController
 	
 	private void removeContact()
 	{
+		String temp = null;
+		System.out.println("연락처 삭제 메뉴입니다.");
 		
+		while(true)
+		{
+			System.out.print("이름을 입력하세요 : ");
+			temp = m_scanner.nextLine();
+			
+			searchContactByName(temp);
+			
+			break;
+		}
 	}
 }

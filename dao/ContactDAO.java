@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import vo.ContactInfoVO;
@@ -79,7 +80,7 @@ public class ContactDAO // db access object
 		{
 			sql.append("CREATE TABLE CONTACTLIST							");
 			sql.append("(													");
-			sql.append("		name            varchar(20)     NOT NULL	");
+			sql.append("		name            varchar(50)     NOT NULL	");
 			sql.append("	,   phone           varchar2(15)				");
 			sql.append("	,   address         varchar2(50)    NOT NULL	");
 			sql.append("	,   relation_type   varchar2(3)					");
@@ -119,7 +120,7 @@ public class ContactDAO // db access object
 			sql.append("CREATE TABLE RELATION								");
 			sql.append("(													");
 			sql.append("		relation_type   varchar2(3)					");
-			sql.append("	,   relation_name   varchar(20)					");
+			sql.append("	,   relation_name   varchar(50)					");
 			sql.append(")													");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
@@ -240,7 +241,7 @@ public class ContactDAO // db access object
 	// endregion
 	
 	// region ALTER TABLE
-		// insert table 
+	// insert table 
 	public int addRelationType(String typeName)
 	{
 		int result = 0;
@@ -255,7 +256,6 @@ public class ContactDAO // db access object
 		sql.append("			LPAD( (SELECT NVL(MAX(relation_type), '000' )	"); 
 		sql.append("					 FROM relation)+1, 3, 0), ?				");
 		sql.append("	   )													");
-		
 		
 		try
 		{
@@ -309,7 +309,6 @@ public class ContactDAO // db access object
 		
 		StringBuilder sql = new StringBuilder();
 		
-		
 		sql.append("select c.name								");
 		sql.append("     , c.phone								");
 		sql.append("	 , c.address							");
@@ -343,7 +342,6 @@ public class ContactDAO // db access object
 		{
 			close(conn,pstmt, rs);
 		}
-
 		
 		return result;
 	}
@@ -353,21 +351,194 @@ public class ContactDAO // db access object
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		StringBuilder sql = new StringBuilder();
+
+		sql.append("select c.name								");
+		sql.append("     , c.phone								");
+		sql.append("	 , c.address							");
+		sql.append("	 , c.join_date							");
+		sql.append("	 , c.relation_type						");
+		sql.append("	 , r.relation_name						");
+		sql.append("  from contactlist c						");
+		sql.append("	 , relation r							");
+		sql.append(" where c.relation_type = r.relation_type	");
+		sql.append("   and c.name = ?							");
+		
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, name);
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next())
+			{
+				ContactInfoVO contact = new ContactInfoVO(rs.getString("name"), rs.getString("phone")
+														, rs.getString("address"), rs.getString("join_date")
+														, rs.getString("relation_type"), rs.getString("relation_name"));
+				
+				result.add(contact);
+			}
+		}
+		catch(SQLException e)
+		{
+			System.out.println("전체 멤버 검색중 문제가 발생하였습니다.");
+		}
+		finally
+		{
+			close(conn,pstmt, rs);
+		}
+		
+		return result;
+	}
+	
+	// 연락처 추가
+	public int insertContact(ContactInfoVO contact)
+	{
+		int result = 0;
+		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+		
+		LocalDate curDate = LocalDate.now();
+
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("INSERT INTO CONTACTLIST(name, phone, address, join_date, relation_type)		");
+		sql.append("values( ? , ? , ? , ? , ? )");
+		
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, contact.getName());
+			pstmt.setString(2, contact.getPhone());
+			pstmt.setString(3, contact.getAddress());
+			pstmt.setString(4, curDate.toString());
+			pstmt.setString(5, contact.getRelation_type());
+			
+			result = pstmt.executeUpdate();
+			
+			if(result > 0)
+			{
+				System.out.println("연락처 수정에 성공했습니다.");
+			}
+			else
+			{
+				System.out.println("연락처 수정에 실패했습니다.");
+			}
+		}
+		catch (SQLTimeoutException e)
+		{
+			System.out.println("TimeOut Exception");
+		}
+		catch (SQLException e)
+		{
+			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+		}
+		finally
+		{
+			close(conn, pstmt);
+		}
+		
 		return result;
 	}
 	
 	// 연락처 수정
-	public int editContact()
+	public int editContact(ContactInfoVO contact)
 	{
 		int result = 0;
+		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("UPDATE CONTACTLIST			");
+		sql.append("   SET name = ?				");
+		sql.append("   SET phone = ?			");
+		sql.append("   SET address = ?			");
+		sql.append("   SET relation_type = ?	");
+				
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, contact.getName());
+			pstmt.setString(2, contact.getPhone());
+			pstmt.setString(3, contact.getAddress());
+			pstmt.setString(4, contact.getRelation_type());
+			
+			result = pstmt.executeUpdate();
+			
+			if(result > 0)
+			{
+				System.out.println("연락처 수정에 성공했습니다.");
+			}
+			else
+			{
+				System.out.println("연락처 수정에 실패했습니다.");
+			}
+		}
+		catch (SQLTimeoutException e)
+		{
+			System.out.println("TimeOut Exception");
+		}
+		catch (SQLException e)
+		{
+			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+		}
+		finally
+		{
+			close(conn, pstmt);
+		}
 		
 		return result;
 	}
 	
 	// 연락처 삭제
-	public int removeContact()
+	public int removeContact(ContactInfoVO contact)
 	{
 		int result = 0;
+		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("DELETE FROM CONTACTLIST		");
+		sql.append(" WHERE phone = ?			");
+				
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, contact.getPhone());
+			
+			result = pstmt.executeUpdate();
+			
+			if(result > 0)
+			{
+				System.out.println("연락처 삭제에 성공했습니다.");
+			}
+			else
+			{
+				System.out.println("연락처 삭제에 실패했습니다.");
+			}
+		}
+		catch (SQLTimeoutException e)
+		{
+			System.out.println("TimeOut Exception");
+		}
+		catch (SQLException e)
+		{
+			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+		}
+		finally
+		{
+			close(conn, pstmt);
+		}
 		
 		return result;
 	}

@@ -11,17 +11,22 @@ public class ContactInfoVO
 	
 	public ContactInfoVO()
 	{
-		
+		name			= null;
+		phone			= null;
+		address			= null;
+		join_date		= null;
+		relation_type	= null;
+		relation_name	= null;
 	}
 	
 	public ContactInfoVO(String name, String phone, String address, String join_date, String relationType, String relation_name)
 	{
-		this.name = name;
-		this.phone = phone;
-		this.address = address;
-		this.join_date = join_date;
-		this.relation_type = relationType;
-		this.relation_name = relation_name;
+		this.name 			= name;
+		this.phone			= phone;
+		this.address       	= address;
+		this.join_date		= join_date;
+		this.relation_type	= relationType;
+		this.relation_name	= relation_name;
 	}
 	
 	public String getName()
@@ -82,5 +87,11 @@ public class ContactInfoVO
 	public void setRelation_name(String relation_name)
 	{
 		this.relation_name = relation_name;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return String.format("[ %s \t\t %s \t\t %s \t\t %s \t %s\t]", this.name, this.phone, this.address, this.join_date, this.relation_name);
 	}
 }
