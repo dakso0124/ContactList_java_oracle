@@ -150,10 +150,10 @@ public class ContactController
 		
 		while(true)
 		{
-			System.out.print("이름을 입력하세요(이전 메뉴로 돌아가시려면 exit를 입력하세요.) : ");
+			System.out.print("이름을 입력하세요(이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
 			temp = m_scanner.nextLine();
 			
-			if(temp.equals("exit"))
+			if(temp.equals("0"))
 			{
 				System.out.println("이전 메뉴로 돌아갑니다.");
 				return;
@@ -206,13 +206,14 @@ public class ContactController
 	private void editContact()
 	{
 		String temp = null;
+		int result = 0;
 		System.out.println("연락처 수정 메뉴입니다.");
 		
 		while(true)
 		{
 			try
 			{
-				System.out.print("수정할 회원의 이름을 입력하세요 (이전메뉴는 0을 입력해 주세요) : ");
+				System.out.print("수정할 회원의 이름을 입력하세요 (이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
 				temp = m_scanner.nextLine();
 				
 				if(temp.equals("0"))
@@ -237,7 +238,7 @@ public class ContactController
 					
 					entryContact(editList.get(0));
 					
-					ContactListService.getInstance().editContact(editList.get(0), temporary);
+					result = ContactListService.getInstance().editContact(editList.get(0), temporary);
 				}
 				else
 				{
@@ -262,7 +263,9 @@ public class ContactController
 							}
 							else
 							{
-								//ContactListService.getInstance().editContact();
+								System.out.println("연락처를 수정합니다.");
+								String originPhone = editList.get(Integer.parseInt(temp)-1).getPhone();
+								result = ContactListService.getInstance().editContact(editList.get(Integer.parseInt(temp)-1), originPhone );
 							}
 						}
 						catch(NumberFormatException e)
@@ -271,9 +274,9 @@ public class ContactController
 							System.out.println("번호를 확인하신 후 숫자를 입력해 주세요.");
 							continue;
 						}
+						break;
 					}
 				}
-				
 				
 				break;
 			}
@@ -287,6 +290,16 @@ public class ContactController
 				e.printStackTrace();
 				System.out.println("");
 			}
+			break;
+		}
+		
+		if(result == 0)
+		{
+			System.out.println("연락처 변경에 실패했습니다.");
+		}
+		else
+		{
+			System.out.println("연락처 변경에 실패했습니다.");
 		}
 	}
 	
@@ -297,12 +310,37 @@ public class ContactController
 		
 		while(true)
 		{
-			System.out.print("이름을 입력하세요 : ");
-			temp = m_scanner.nextLine();
-			
-			ArrayList<ContactInfoVO> delList = searchByName(temp);
-			
-			
+			try
+			{
+				System.out.print("이름을 입력하세요 (이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
+				temp = m_scanner.nextLine();
+				
+				ArrayList<ContactInfoVO> delList = searchByName(temp);
+				
+				if(delList.size() == 0)
+				{
+					System.out.println("입력하신 이름의 회원이 없습니다.");
+					continue;
+				}
+				else if(delList.size() == 1)
+				{
+					
+				}
+				else
+				{
+					
+				}
+			}
+			catch(NoSuchElementException e)
+			{
+				e.printStackTrace();
+				System.out.println("");
+			}
+			catch(IllegalStateException e)
+			{
+				e.printStackTrace();
+				System.out.println("");
+			}
 			
 			break;
 		}

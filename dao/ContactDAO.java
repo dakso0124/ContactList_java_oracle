@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import vo.ContactInfoVO;
+import vo.RelationVO;
 
 public class ContactDAO // db access object
 {
@@ -311,6 +312,14 @@ public class ContactDAO // db access object
 //		return result;
 //	}
 	// endregion ALTER TABLE
+	
+	// 관계 테이블 가져오기
+	public ArrayList<RelationVO> getRelationData()
+	{
+		ArrayList<RelationVO> result = new ArrayList<RelationVO>();
+		
+		return result;
+	}
 
 	// 연락처 전체 보기
 	public ArrayList<ContactInfoVO> showAll()
