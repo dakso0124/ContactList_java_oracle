@@ -46,11 +46,11 @@ public class ContactListService
 		return result;
 	}
 	
-	public int editContact(ContactInfoVO contact, ContactInfoVO origin)
+	public int editContact(ContactInfoVO contact, String originPhone)
 	{
 		int result = 0;
 		
-		result = ContactDAO.getInstance().editContact(contact, origin);
+		result = ContactDAO.getInstance().editContact(contact, originPhone);
 		
 		return result;
 	}

@@ -463,7 +463,7 @@ public class ContactDAO // db access object
 	}
 	
 	// 연락처 수정
-	public int editContact(ContactInfoVO contact, ContactInfoVO origin)
+	public int editContact(ContactInfoVO contact, String originPhone)
 	{
 		int result = 0;
 		
@@ -473,10 +473,11 @@ public class ContactDAO // db access object
 		StringBuilder sql = new StringBuilder();
 		
 		sql.append("UPDATE CONTACTLIST			");
-		sql.append("   SET name = ?				");
-		sql.append("   SET phone = ?			");
-		sql.append("   SET address = ?			");
-		sql.append("   SET relation_type = ?	");
+		sql.append("   SET name 		 = ?	");
+		sql.append("	 , phone 		 = ?	");
+		sql.append("	 , address 	 	 = ?	");
+		sql.append("     , relation_type = ?	");
+		sql.append(" WHERE phone 		 = ?	");
 				
 		try
 		{
@@ -485,6 +486,7 @@ public class ContactDAO // db access object
 			pstmt.setString(2, contact.getPhone());
 			pstmt.setString(3, contact.getAddress());
 			pstmt.setString(4, contact.getRelation_type());
+			pstmt.setString(5, originPhone);
 			
 			result = pstmt.executeUpdate();
 			

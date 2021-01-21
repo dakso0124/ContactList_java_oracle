@@ -230,7 +230,12 @@ public class ContactController
 				}
 				else if(editList.size() == 1)
 				{
-					ContactInfoVO temporary = entryContact(editList.get(0));
+					System.out.println(String.format("1명의 연락처가 검색되었습니다-----------------", editList.size()));
+					System.out.println( editList.get(0).toString());
+					System.out.println("연락처를 수정합니다------------------------");
+					String temporary = editList.get(0).getPhone();
+					
+					entryContact(editList.get(0));
 					
 					ContactListService.getInstance().editContact(editList.get(0), temporary);
 				}
@@ -266,9 +271,7 @@ public class ContactController
 							System.out.println("번호를 확인하신 후 숫자를 입력해 주세요.");
 							continue;
 						}
-						
 					}
-					
 				}
 				
 				
