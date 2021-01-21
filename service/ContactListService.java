@@ -15,6 +15,11 @@ public class ContactListService
 		return instance;
 	}
 	
+	private ContactListService()
+	{
+		
+	}
+	
 	public ArrayList<ContactInfoVO> showAll()
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
@@ -22,7 +27,7 @@ public class ContactListService
 		return result;
 	}
 	
-	public ArrayList<ContactInfoVO> searchContact()
+	public ArrayList<ContactInfoVO> searchContact(String name)
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		

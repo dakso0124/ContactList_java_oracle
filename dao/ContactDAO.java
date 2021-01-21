@@ -13,6 +13,20 @@ import vo.ContactInfoVO;
 
 public class ContactDAO // db access object
 {
+	private static ContactDAO instance;
+	public static ContactDAO getInstance()
+	{
+		if(instance == null)
+			instance = new ContactDAO();
+		
+		return instance;
+	}
+	
+	private ContactDAO()
+	{
+		
+	}
+	
 	private Connection conn = null;
 
 	private Connection getConnection()

@@ -8,6 +8,20 @@ import vo.ContactInfoVO;
 
 public class ContactController
 {
+	private static ContactController instance;
+	public static ContactController getInstance()
+	{
+		if(instance == null)
+			instance = new ContactController();
+		
+		return instance;
+	}
+	
+	private ContactController()
+	{
+		
+	}
+	
  	private Scanner m_scanner;
  	
  	public void init()
@@ -135,11 +149,14 @@ public class ContactController
 				return;
 			}
 			
+			ContactInfoVO contact = searchByName(temp);
+			
+			
 			break;
 		}
 	}
 	
-	private ContactInfoVO searchContactByName(String name)
+	private ContactInfoVO searchByName(String name)
 	{
 		ContactInfoVO result = new ContactInfoVO();
 		
@@ -231,7 +248,7 @@ public class ContactController
 			System.out.print("이름을 입력하세요 : ");
 			temp = m_scanner.nextLine();
 			
-			searchContactByName(temp);
+			//searchByName(temp);
 			
 			break;
 		}
