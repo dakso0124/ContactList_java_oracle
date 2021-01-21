@@ -2,9 +2,9 @@ package vo;
 
 public class ContactInfoVO
 {
-	private String name;		// Not Null
-	private String phone;		// pk
-	private String address;		// not null
+	private String name;			// Not Null
+	private String phone;			// pk
+	private String address;			// not null
 	private String join_date;
 	private String relation_type;	// fk
 	private String relation_name;	// not null

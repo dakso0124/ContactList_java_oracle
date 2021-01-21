@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -91,26 +92,26 @@ public class ContactController
 		{
 			try
 			{
-				System.out.print("1. 연락처 전체 보기\n2. 연락처 검색\n3. 이전 메뉴로");
+				System.out.print("1. 연락처 전체 보기\n2. 연락처 검색\n0. 이전 메뉴로\n원하는 메뉴를 선택해 주세요 : ");
 				temp = m_scanner.nextLine();
 				
 				switch(temp)
 				{
+					case "0":
+						System.out.println("이전 메뉴로 돌아갑니다.");
+						return;
+					
 					case "1":
-						searchAll();
+						showAll();
 						break;
 					
 					case "2":
 						searchContactByName();
 						break;
 						
-					case "3":
-						System.out.println("이전 메뉴로 돌아갑니다.");
-						return;
-						
 					default:
 						System.out.println("메뉴를 확인하시고 원하는 숫자를 입력해 주세요.");
-						break;
+						continue;
 				}
 				
 				break;
@@ -128,15 +129,24 @@ public class ContactController
 		}
 	}
 	
-	private void searchAll()
+	private void showAll()
 	{
+		System.out.println("연락처 목록----------------------------------");
+		ArrayList<ContactInfoVO> infoList = ContactListService.getInstance().showAll();
 		
+		for(int i = 0 ; i < infoList.size(); i++)
+		{
+			System.out.println(infoList.get(i).toString());
+		}
+		System.out.println("------------------------------------------");
 	}
 	
+	// '연락처 검색 -> 이름으로 검색' 메뉴를 통해 접근
 	private void searchContactByName()
 	{
 		String temp = null;
-		System.out.println("연락처를 검색합니다.");
+		
+		ArrayList<ContactInfoVO> infoList = new ArrayList<ContactInfoVO>();
 		
 		while(true)
 		{
@@ -148,33 +158,160 @@ public class ContactController
 				System.out.println("이전 메뉴로 돌아갑니다.");
 				return;
 			}
+
+			infoList = searchByName(temp);
 			
-			ContactInfoVO contact = searchByName(temp);
+			if(infoList.size() == 0)
+			{
+				System.out.println("검색 결과가 없습니다");
+				continue;
+			}
 			
+			System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", infoList.size()));
+			for(int i = 0 ; i < infoList.size(); i++)
+			{
+				System.out.println( (i+1) + " : " + infoList.get(i).toString());
+			}
+			System.out.println("-----------------------------------------");
 			
 			break;
 		}
 	}
 	
-	private ContactInfoVO searchByName(String name)
+	// 실제 이름으로 검색해서 arrlist 리턴
+	private ArrayList<ContactInfoVO> searchByName(String name)
 	{
-		ContactInfoVO result = new ContactInfoVO();
+		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		
-		
+		result = ContactListService.getInstance().searchContact(name);
 		
 		return result;
 	}
 	
 	private void addContact()
 	{
-		String temp 	= null;
+		System.out.println("연락처를 추가합니다.");
+		ContactInfoVO insert = entryContact(new ContactInfoVO());
 		
+		if(ContactListService.getInstance().addContact(insert) == 0)
+		{
+			System.out.println("연락처 추가에 실패했습니다.");
+		}
+		else
+		{
+			System.out.println("연락처 추가에 성공했습니다.");
+		}
+	}
+	
+	private void editContact()
+	{
+		String temp = null;
+		System.out.println("연락처 수정 메뉴입니다.");
+		
+		while(true)
+		{
+			try
+			{
+				System.out.print("수정할 회원의 이름을 입력하세요 (이전메뉴는 0을 입력해 주세요) : ");
+				temp = m_scanner.nextLine();
+				
+				if(temp.equals("0"))
+				{
+					System.out.println("이전 메뉴로 돌아갑니다.");
+					return;
+				}
+				
+				ArrayList<ContactInfoVO> editList = searchByName(temp);
+				
+				if(editList.size() == 0)
+				{
+					System.out.println("입력한 이름의 회원이 없습니다.");
+					continue;
+				}
+				else if(editList.size() == 1)
+				{
+					ContactInfoVO temporary = entryContact(editList.get(0));
+					
+					ContactListService.getInstance().editContact(editList.get(0), temporary);
+				}
+				else
+				{
+					while(true)
+					{
+						System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", editList.size()));
+						for(int i = 0 ; i < editList.size(); i++)
+						{
+							System.out.println( (i+1) + " : " + editList.get(i).toString());
+						}
+						System.out.println("-----------------------------------------");
+						
+						try
+						{
+							System.out.print("수정하실 회원의 번호를 입력하세요 : ");
+							temp = m_scanner.nextLine();
+							
+							if(Integer.parseInt(temp) < 1 || editList.size() <= Integer.parseInt(temp))
+							{
+								System.out.println("숫자를 정확히 입력해 주세요.");
+								continue;
+							}
+							else
+							{
+								//ContactListService.getInstance().editContact();
+							}
+						}
+						catch(NumberFormatException e)
+						{
+							e.printStackTrace();
+							System.out.println("번호를 확인하신 후 숫자를 입력해 주세요.");
+							continue;
+						}
+						
+					}
+					
+				}
+				
+				
+				break;
+			}
+			catch(NoSuchElementException e)
+			{
+				e.printStackTrace();
+				System.out.println("");
+			}
+			catch(IllegalStateException e)
+			{
+				e.printStackTrace();
+				System.out.println("");
+			}
+		}
+	}
+	
+	private void removeContact()
+	{
+		String temp = null;
+		System.out.println("연락처 삭제 메뉴입니다.");
+		
+		while(true)
+		{
+			System.out.print("이름을 입력하세요 : ");
+			temp = m_scanner.nextLine();
+			
+			ArrayList<ContactInfoVO> delList = searchByName(temp);
+			
+			
+			
+			break;
+		}
+	}
+	
+	private ContactInfoVO entryContact(ContactInfoVO contact)
+	{
 		String name 	= null;
 		String phone 	= null;
 		String address 	= null;
 		String relation = null;
 		
-		System.out.println("연락처를 추가합니다.");
 		while(true)
 		{
 			try
@@ -187,7 +324,6 @@ public class ContactController
 					System.out.print("전화번호를 입력하세요(숫자만 입력) : ");
 					phone = m_scanner.nextLine();
 
-					
 					break;
 				}
 				
@@ -210,14 +346,11 @@ public class ContactController
 					}
 					else
 					{
-						continue;
+						//continue;
 					}
-						 
 					
 					break;
 				}
-				
-				
 			}
 			catch(NoSuchElementException e)
 			{
@@ -229,28 +362,14 @@ public class ContactController
 				e.printStackTrace();
 				System.out.println("");
 			}
-			
-		}
-	}
-	
-	private void editContact()
-	{
-		
-	}
-	
-	private void removeContact()
-	{
-		String temp = null;
-		System.out.println("연락처 삭제 메뉴입니다.");
-		
-		while(true)
-		{
-			System.out.print("이름을 입력하세요 : ");
-			temp = m_scanner.nextLine();
-			
-			//searchByName(temp);
-			
 			break;
 		}
+		
+		contact.setName(name);
+		contact.setPhone(phone);
+		contact.setAddress(address);
+		contact.setRelation_type(relation);
+		
+		return contact;
 	}
 }

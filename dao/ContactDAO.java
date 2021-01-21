@@ -380,11 +380,12 @@ public class ContactDAO // db access object
 		sql.append("  from contactlist c						");
 		sql.append("	 , relation r							");
 		sql.append(" where c.relation_type = r.relation_type	");
-		sql.append("   and c.name = ?							");
+		sql.append("   and c.name LIKE ?						");
 		
 		try
 		{
 			pstmt = conn.prepareStatement(sql.toString());
+			name = "%" + name + "%";
 			pstmt.setString(1, name);
 			
 			rs = pstmt.executeQuery();
@@ -462,7 +463,7 @@ public class ContactDAO // db access object
 	}
 	
 	// 연락처 수정
-	public int editContact(ContactInfoVO contact)
+	public int editContact(ContactInfoVO contact, ContactInfoVO origin)
 	{
 		int result = 0;
 		

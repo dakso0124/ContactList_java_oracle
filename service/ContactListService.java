@@ -2,6 +2,7 @@ package service;
 
 import java.util.ArrayList;
 
+import dao.ContactDAO;
 import vo.ContactInfoVO;
 
 public class ContactListService
@@ -24,6 +25,8 @@ public class ContactListService
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		
+		result = ContactDAO.getInstance().showAll();
+		
 		return result;
 	}
 	
@@ -38,20 +41,26 @@ public class ContactListService
 	{
 		int result = 0;
 		
+		result = ContactDAO.getInstance().insertContact(contact);
+		
 		return result;
 	}
 	
-	public int editContact(ContactInfoVO contact)
+	public int editContact(ContactInfoVO contact, ContactInfoVO origin)
 	{
 		int result = 0;
 		
-		return result;		
+		result = ContactDAO.getInstance().editContact(contact, origin);
+		
+		return result;
 	}
 	
 	public int removeContact(ContactInfoVO contact)
 	{
 		int result = 0;
 		
-		return result;		
+		result = ContactDAO.getInstance().removeContact(contact);
+		
+		return result;
 	}
 }
