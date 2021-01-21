@@ -2,8 +2,20 @@ package vo;
 
 public class RelationVO
 {
-	private String relation_name;
 	private String realation_type;
+	private String relation_name;
+	
+	public RelationVO()
+	{
+		
+	}
+	
+	public RelationVO(String relation_type, String relation_name)
+	{
+
+		this.realation_type = relation_type;
+		this.relation_name = relation_name;
+	}
 	
 	public String getRelation_name()
 	{
@@ -28,6 +40,6 @@ public class RelationVO
 	@Override
 	public String toString()
 	{
-		return String.format("[ %s \t\t %s \t]", this.relation_name, this.realation_type);
+		return String.format("[ %-20s %-20s ]", this.relation_name, this.realation_type);
 	}
 }

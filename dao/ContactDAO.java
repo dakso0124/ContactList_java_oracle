@@ -318,6 +318,37 @@ public class ContactDAO // db access object
 	{
 		ArrayList<RelationVO> result = new ArrayList<RelationVO>();
 		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("SELECT relation_type, relation_name		");
+		sql.append("  FROM RELATION							");
+		
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next())
+			{
+				RelationVO relation = new RelationVO(rs.getString("relation_type"), rs.getString("relation_name"));
+				
+				result.add(relation);
+			}
+		}
+		catch(SQLException e)
+		{
+			System.out.println("관계 테이블을 가져오던 도중 문제가 발생하였습니다.");
+		}
+		finally
+		{
+			close(conn, pstmt, rs);
+		}
+				
 		return result;
 	}
 

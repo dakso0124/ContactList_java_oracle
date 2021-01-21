@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import exceptions.WrongNumberException;
 import service.ContactListService;
 import vo.ContactInfoVO;
+import vo.RelationVO;
 
 public class ContactController
 {
@@ -305,6 +307,7 @@ public class ContactController
 	
 	private void removeContact()
 	{
+		int result = 0;
 		String temp = null;
 		System.out.println("연락처 삭제 메뉴입니다.");
 		
@@ -324,11 +327,50 @@ public class ContactController
 				}
 				else if(delList.size() == 1)
 				{
-					
+					System.out.println(String.format("1명의 연락처가 검색되었습니다-----------------", delList.size()));
+					System.out.println( delList.get(0).toString());
+					System.out.println("연락처를 삭제합니다------------------------");
+					result = ContactListService.getInstance().removeContact(delList.get(0));
 				}
 				else
 				{
-					
+					while(true)
+					{
+						System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", delList.size()));
+						for(int i = 0 ; i < delList.size(); i++)
+						{
+							System.out.println( (i+1) + " : " + delList.get(i).toString());
+						}
+						System.out.println("-----------------------------------------");
+						
+						try
+						{
+							System.out.print("삭제하실 회원의 번호를 입력하세요 : ");
+							temp = m_scanner.nextLine();
+							
+							if(Integer.parseInt(temp) < 1 || delList.size() <= Integer.parseInt(temp))
+							{
+								throw new WrongNumberException();
+							}
+							else
+							{
+								System.out.println("연락처를 삭제합니다.");
+								result = ContactListService.getInstance().removeContact((delList.get(Integer.parseInt(temp)-1)));
+							}
+						}
+						catch(WrongNumberException e)
+						{
+							System.out.println("숫자를 정확히 입력해 주세요.");
+							continue;
+						}
+						catch(NumberFormatException e)
+						{
+							e.printStackTrace();
+							System.out.println("번호를 확인하신 후 숫자를 입력해 주세요.");
+							continue;
+						}
+						break;
+					}
 				}
 			}
 			catch(NoSuchElementException e)
@@ -348,10 +390,13 @@ public class ContactController
 	
 	private ContactInfoVO entryContact(ContactInfoVO contact)
 	{
-		String name 	= null;
-		String phone 	= null;
-		String address 	= null;
-		String relation = null;
+		String name			 = null;
+		String phone 		 = null;
+		String address 		 = null;
+		String relation_type = null;
+		String relation_name = null;
+		
+		int relation = 0;
 		
 		while(true)
 		{
@@ -373,21 +418,78 @@ public class ContactController
 				
 				while(true)
 				{
-					System.out.print("관계를 선택하세요 (추가하시려면 0을 입력하세요.) : ");
-					relation = m_scanner.nextLine();
-					
-					if(relation.equals("0"))
+					try
 					{
-						// add relation row
+						ArrayList<RelationVO> relations = ContactListService.getInstance().getRelations(); 
+						
+						System.out.println("----------------------------------");
+						for(int i = 0 ; i < relations .size(); i++)
+						{
+							System.out.println((i+1) + " : " + relations.get(i).getRelation_name());
+						}
+						System.out.println("----------------------------------");
+						System.out.print("관계를 선택해주세요 (관계 추가는 0을 선택해 주세요): ");
+						relation_type = m_scanner.nextLine();
+						
+						relation = Integer.parseInt(relation_type);
+						if(relation == 0)
+						{
+							boolean isExist = false;
+							while(true)
+							{
+								System.out.print("추가할 관계명을 입력하세요 : ");
+								relation_name = m_scanner.nextLine();
+								
+								for(int i = 0 ; i < relations.size() ; i++ )
+								{
+									if(relations.get(i).getRelation_name().equals(relation_name))
+									{
+										isExist = true;
+										break;
+									}
+								}
+								
+								if(!isExist)
+								{
+									ContactListService.getInstance().addRelationType(relation_name);
+									relation_type = String.format("%03d", relations.size()+1);
+								}
+								else
+								{
+									System.out.println("입력하신 관계명이 이미 존재합니다. 다시 입력해 주세요.");
+									continue;
+								}
+								break;
+							}
+						}
+						else if(relation < 1 || relation > relations.size())
+						{
+							throw new WrongNumberException();
+						}
+						else
+						{
+							relation_type = relations.get(relation -1).getRealation_type();
+							relation_name = relations.get(relation -1).getRelation_name();	
+						}
 					}
-					else if(true)
-					//else if(relation.matches("^01(?:1)()(\\d{3}|\\d{4})(\\d{4})$"))
+					catch(WrongNumberException e)
+					{
+						System.out.println("숫자를 정확히 입력해 주세요.");
+						continue;
+					}
+					catch(NumberFormatException e)
 					{
 						
 					}
-					else
+					catch(NoSuchElementException e)
 					{
-						//continue;
+						e.printStackTrace();
+						System.out.println("");
+					}
+					catch(IllegalStateException e)
+					{
+						e.printStackTrace();
+						System.out.println("");
 					}
 					
 					break;
@@ -409,7 +511,8 @@ public class ContactController
 		contact.setName(name);
 		contact.setPhone(phone);
 		contact.setAddress(address);
-		contact.setRelation_type(relation);
+		contact.setRelation_name(relation_name);
+		contact.setRelation_type(relation_type);
 		
 		return contact;
 	}

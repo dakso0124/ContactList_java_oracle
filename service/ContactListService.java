@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import dao.ContactDAO;
 import vo.ContactInfoVO;
+import vo.RelationVO;
 
 public class ContactListService
 {
@@ -33,6 +34,26 @@ public class ContactListService
 	public ArrayList<ContactInfoVO> searchContact(String name)
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
+		
+		result = ContactDAO.getInstance().searchContact(name);
+		
+		return result;
+	}
+	
+	public ArrayList<RelationVO> getRelations()
+	{
+		ArrayList<RelationVO> result = new ArrayList<RelationVO>();
+		
+		result = ContactDAO.getInstance().getRelationData();
+		
+		return result;
+	}
+	
+	public int addRelationType(String typeName)
+	{
+		int result = 0;
+		
+		result = ContactDAO.getInstance().addRelationType(typeName);
 		
 		return result;
 	}

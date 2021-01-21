@@ -19,12 +19,11 @@ public class ContactInfoVO
 		relation_name	= null;
 	}
 	
-	public ContactInfoVO(String name, String phone, String address, String join_date, String relationType)
+	public ContactInfoVO(String name, String phone, String address, String relationType)
 	{
 		this.name 			= name;
 		this.phone			= phone;
 		this.address       	= address;
-		this.join_date		= join_date;
 		this.relation_type	= relationType;
 	}
 	
@@ -101,6 +100,6 @@ public class ContactInfoVO
 	@Override
 	public String toString()
 	{
-		return String.format("[ %s \t\t %s \t\t %s \t\t %s \t %s\t]", this.name, this.phone, this.address, this.join_date, this.relation_name);
+		return String.format("[ %-30s  %-30s  %-30s  %-30s  %-30s ]", this.name, this.phone, this.address, this.join_date, this.relation_name);
 	}
 }
