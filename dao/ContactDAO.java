@@ -6,24 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
+import viewer.ContactListViewer;
 import vo.ContactInfoVO;
 import vo.RelationVO;
 
 public class ContactDAO // db access object
 {
-	private static ContactDAO instance;
-	public static ContactDAO getInstance()
-	{
-		if(instance == null)
-			instance = new ContactDAO();
-		
-		return instance;
-	}
-	
-	private ContactDAO()
+	public ContactDAO()
 	{
 		
 	}
@@ -88,18 +79,18 @@ public class ContactDAO // db access object
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
 		StringBuilder sql = new StringBuilder();
 		try
 		{
 			sql.append("CREATE TABLE CONTACTLIST							");
 			sql.append("(													");
-			sql.append("		name            varchar(50)     NOT NULL	");
-			sql.append("	,   phone           varchar2(15)				");
-			sql.append("	,   address         varchar2(50)    NOT NULL	");
-			sql.append("	,   relation_type   varchar2(3)					");
-			sql.append("	,   join_date       DATE						");
+			sql.append("		memberid		NUMBER						");
+			sql.append("	,	name            VARCHAR2(50)     NOT NULL	");
+			sql.append("	,   phone           VARCHAR2(15)				");
+			sql.append("	,   address         VARCHAR2(50)    NOT NULL	");
+			sql.append("	,   relation_type   VARCHAR2(3)					");
+			sql.append("	,   join_date       CHAR(8)						");
 			sql.append(")													");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
@@ -111,11 +102,11 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			System.out.println("CONTACTLIST 테이블 생성 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
-			close(conn, pstmt, rs);
+			close(conn, pstmt);
 
 			CreateRelationTable();
 		}
@@ -126,7 +117,6 @@ public class ContactDAO // db access object
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
 		StringBuilder sql = new StringBuilder();
 
@@ -134,8 +124,8 @@ public class ContactDAO // db access object
 		{
 			sql.append("CREATE TABLE RELATION								");
 			sql.append("(													");
-			sql.append("		relation_type   varchar2(3)					");
-			sql.append("	,   relation_name   varchar(50)					");
+			sql.append("		relation_type   VARCHAR2(3)					");
+			sql.append("	,   relation_name   VARCHAR2(50)				");
 			sql.append(")													");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
@@ -147,21 +137,20 @@ public class ContactDAO // db access object
 		} 
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			System.out.println("RELATION 테이블 생성 도중 문제가 발생했습니다." + e.getMessage());
 		} 
 		finally
 		{
-			close(conn, pstmt, rs);
+			close(conn, pstmt);
 			addContactListPhonePK();
 		}
 	}
-
+	
 	// CONTACTLIST - phone 컬럼에 PK 지정
 	private void addContactListPhonePK()
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
 		StringBuilder sql = new StringBuilder();
 
@@ -181,11 +170,44 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			System.out.println("CONTACTLIST PK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
-			close(conn, pstmt, rs);
+			close(conn, pstmt);
+			addContactListMemberidUK();
+		}
+	}
+	
+	// CONTACTLIST - memberid 컬럼에 UK지정
+	private void addContactListMemberidUK()
+	{
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+
+		StringBuilder sql = new StringBuilder();
+
+		try
+		{
+			conn = getConnection();
+			pstmt = null;
+			sql.append("ALTER TABLE CONTACTLIST										");
+			sql.append("  ADD CONSTRAINT uk_contactlist_memberid UNIQUE (memberid)	");
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.executeUpdate();
+			System.out.println("CONTACTLIST memberid column UK 지정에 성공했습니다.");
+		}
+		catch (SQLTimeoutException e)
+		{
+			System.out.println("TimeOut Exception 발생");
+		}
+		catch (SQLException e)
+		{
+			System.out.println("CONTACTLIST UK 지정 도중 문제가 발생했습니다." + e.getMessage());
+		}
+		finally
+		{
+			close(conn, pstmt);
 			addRelationTypePK();
 		}
 	}
@@ -195,7 +217,6 @@ public class ContactDAO // db access object
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
 		StringBuilder sql = new StringBuilder();
 
@@ -213,11 +234,11 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			System.out.println("RELATION PK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
-			close(conn, pstmt, rs);
+			close(conn, pstmt);
 			addContactListTypeFK();
 		}
 	}
@@ -227,7 +248,6 @@ public class ContactDAO // db access object
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
 		StringBuilder sql = new StringBuilder();
 
@@ -246,17 +266,16 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			System.out.println("CONTACTLIST FK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
-			close(conn, pstmt, rs);
+			close(conn, pstmt);
 		}
 	}
 	// endregion
 	
-	// region ALTER TABLE
-	// insert table 
+	// 그룹 추가 
 	public int addRelationType(String typeName)
 	{
 		int result = 0;
@@ -277,15 +296,7 @@ public class ContactDAO // db access object
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, typeName);
 			result = pstmt.executeUpdate();
-			
-			if(result > 0)
-			{
-				System.out.println("타입이 정상적으로 추가되었습니다.");
-			}
-			else
-			{
-				System.out.println("타입추가에 실패했습니다.");
-			}
+
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -293,7 +304,7 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			System.out.println("RELATION 컬럼 추가 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -302,16 +313,6 @@ public class ContactDAO // db access object
 		
 		return result;
 	}
-		
-//	public int removeRelationTypeColumn(String typeName)
-//	{
-//		int result = 0;
-//		
-//		
-//		
-//		return result;
-//	}
-	// endregion ALTER TABLE
 	
 	// 관계 테이블 가져오기
 	public ArrayList<RelationVO> getRelationData()
@@ -326,6 +327,7 @@ public class ContactDAO // db access object
 		
 		sql.append("SELECT relation_type, relation_name		");
 		sql.append("  FROM RELATION							");
+		sql.append(" ORDER BY relation_type					");
 		
 		try
 		{
@@ -342,7 +344,8 @@ public class ContactDAO // db access object
 		}
 		catch(SQLException e)
 		{
-			System.out.println("관계 테이블을 가져오던 도중 문제가 발생하였습니다.");
+			//System.out.println("관계 테이블을 가져오던 도중 문제가 발생하였습니다." + e.getMessage());
+			ContactListViewer.getInstance().checkResult(-96);
 		}
 		finally
 		{
@@ -363,15 +366,17 @@ public class ContactDAO // db access object
 		
 		StringBuilder sql = new StringBuilder();
 		
-		sql.append("select c.name								");
+		sql.append("SELECT c.memberid							");
+		sql.append("     , c.name								");
 		sql.append("     , c.phone								");
 		sql.append("	 , c.address							");
 		sql.append("	 , c.join_date							");
 		sql.append("	 , c.relation_type						");
 		sql.append("	 , r.relation_name						");
-		sql.append("  from contactlist c						");
+		sql.append("  FROM contactlist c						");
 		sql.append("	 , relation r							");
-		sql.append(" where c.relation_type = r.relation_type	");		
+		sql.append(" WHERE c.relation_type = r.relation_type	");
+		sql.append(" ORDER BY c.memberid						");
 		
 		try
 		{
@@ -381,7 +386,7 @@ public class ContactDAO // db access object
 			
 			while(rs.next())
 			{
-				ContactInfoVO contact = new ContactInfoVO(rs.getString("name"), rs.getString("phone")
+				ContactInfoVO contact = new ContactInfoVO(rs.getInt("memberid"), rs.getString("name"), rs.getString("phone")
 														, rs.getString("address"), rs.getString("join_date")
 														, rs.getString("relation_type"), rs.getString("relation_name"));
 				
@@ -390,7 +395,8 @@ public class ContactDAO // db access object
 		}
 		catch(SQLException e)
 		{
-			System.out.println("전체 멤버 검색중 문제가 발생하였습니다.");
+			//System.out.println("전체 멤버 검색중 문제가 발생하였습니다." + e.getMessage());
+			ContactListViewer.getInstance().checkResult(-97);
 		}
 		finally
 		{
@@ -411,16 +417,18 @@ public class ContactDAO // db access object
 		
 		StringBuilder sql = new StringBuilder();
 
-		sql.append("select c.name								");
+		sql.append("SELECT c.memberid							");
+		sql.append("     , c.name								");
 		sql.append("     , c.phone								");
 		sql.append("	 , c.address							");
 		sql.append("	 , c.join_date							");
 		sql.append("	 , c.relation_type						");
 		sql.append("	 , r.relation_name						");
-		sql.append("  from contactlist c						");
+		sql.append("  FROM contactlist c						");
 		sql.append("	 , relation r							");
-		sql.append(" where c.relation_type = r.relation_type	");
-		sql.append("   and c.name LIKE ?						");
+		sql.append(" WHERE c.relation_type = r.relation_type	");
+		sql.append("   AND c.name LIKE ?						");
+		sql.append(" ORDER BY memberid							");
 		
 		try
 		{
@@ -432,7 +440,7 @@ public class ContactDAO // db access object
 			
 			while(rs.next())
 			{
-				ContactInfoVO contact = new ContactInfoVO(rs.getString("name"), rs.getString("phone")
+				ContactInfoVO contact = new ContactInfoVO(rs.getInt("memberid"), rs.getString("name"), rs.getString("phone")
 														, rs.getString("address"), rs.getString("join_date")
 														, rs.getString("relation_type"), rs.getString("relation_name"));
 				
@@ -441,7 +449,8 @@ public class ContactDAO // db access object
 		}
 		catch(SQLException e)
 		{
-			System.out.println("전체 멤버 검색중 문제가 발생하였습니다.");
+			//System.out.println("멤버 검색 도중 문제가 발생하였습니다." + e.getMessage());
+			ContactListViewer.getInstance().checkResult(-98);
 		}
 		finally
 		{
@@ -458,13 +467,14 @@ public class ContactDAO // db access object
 		
 		conn = getConnection();
 		PreparedStatement pstmt = null;
-		
-		LocalDate curDate = LocalDate.now();
 
 		StringBuilder sql = new StringBuilder();
 		
-		sql.append("INSERT INTO CONTACTLIST(name, phone, address, join_date, relation_type)		");
-		sql.append("values( ? , ? , ? , ? , ? )");
+		// 회원번호는 가장큰수를 select하여 거기에 +1로 지정
+		sql.append("INSERT INTO CONTACTLIST(memberid, name, phone, address, relation_type, join_date)	");
+		sql.append("VALUES( (SELECT NVL(MAX(memberid) + 1, 1)											"); 
+		sql.append("		  FROM CONTACTLIST), ? , ? , ? , ? , ?)										");
+		
 		
 		try
 		{
@@ -472,18 +482,14 @@ public class ContactDAO // db access object
 			pstmt.setString(1, contact.getName());
 			pstmt.setString(2, contact.getPhone());
 			pstmt.setString(3, contact.getAddress());
-			pstmt.setString(4, curDate.toString());
-			pstmt.setString(5, contact.getRelation_type());
+			pstmt.setString(4, contact.getRelation_type());
+			pstmt.setString(5, contact.getJoin_date());
 			
 			result = pstmt.executeUpdate();
 			
 			if(result > 0)
 			{
-				System.out.println("연락처 수정에 성공했습니다.");
-			}
-			else
-			{
-				System.out.println("연락처 수정에 실패했습니다.");
+				result = 1;
 			}
 		}
 		catch (SQLTimeoutException e)
@@ -492,7 +498,19 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			//System.out.println("연락처 추가 도중 문제가 발생했습니다."+ e.getMessage());
+			if(e.getMessage().contains("PK_CONTACTLIST_PHONE"))	// pk 위반
+			{
+				result = -1;
+			}
+			else if(e.getMessage().contains("value too large"))	// value overflow
+			{
+				result = -2;
+			}
+			else
+			{
+				result = -99;
+			}
 		}
 		finally
 		{
@@ -503,7 +521,7 @@ public class ContactDAO // db access object
 	}
 	
 	// 연락처 수정
-	public int editContact(ContactInfoVO contact, String originPhone)
+	public int editContact(ContactInfoVO contact)
 	{
 		int result = 0;
 		
@@ -517,26 +535,23 @@ public class ContactDAO // db access object
 		sql.append("	 , phone 		 = ?	");
 		sql.append("	 , address 	 	 = ?	");
 		sql.append("     , relation_type = ?	");
-		sql.append(" WHERE phone 		 = ?	");
+		sql.append(" WHERE memberid		 = ?	");
 				
 		try
 		{
 			pstmt = conn.prepareStatement(sql.toString());
+			
 			pstmt.setString(1, contact.getName());
 			pstmt.setString(2, contact.getPhone());
 			pstmt.setString(3, contact.getAddress());
 			pstmt.setString(4, contact.getRelation_type());
-			pstmt.setString(5, originPhone);
+			pstmt.setInt   (5, contact.getMemberID());
 			
 			result = pstmt.executeUpdate();
 			
 			if(result > 0)
 			{
-				System.out.println("연락처 수정에 성공했습니다.");
-			}
-			else
-			{
-				System.out.println("연락처 수정에 실패했습니다.");
+				result = 2;
 			}
 		}
 		catch (SQLTimeoutException e)
@@ -545,7 +560,19 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			//System.out.println("연락처 수정 도중 문제가 발생했습니다."+ e.getMessage());
+			if(e.getMessage().contains("PK_CONTACTLIST_PHONE"))	// pk 위반
+			{
+				result = -1;
+			}
+			else if(e.getMessage().contains("value too large"))	// value overflow
+			{
+				result = -2;
+			}
+			else
+			{
+				result = -99;
+			}
 		}
 		finally
 		{
@@ -566,22 +593,18 @@ public class ContactDAO // db access object
 		StringBuilder sql = new StringBuilder();
 		
 		sql.append("DELETE FROM CONTACTLIST		");
-		sql.append(" WHERE phone = ?			");
+		sql.append(" WHERE memberid = ?			");
 				
 		try
 		{
 			pstmt = conn.prepareStatement(sql.toString());
-			pstmt.setString(1, contact.getPhone());
+			pstmt.setInt(1, contact.getMemberID());
 			
 			result = pstmt.executeUpdate();
 			
 			if(result > 0)
 			{
-				System.out.println("연락처 삭제에 성공했습니다.");
-			}
-			else
-			{
-				System.out.println("연락처 삭제에 실패했습니다.");
+				result = 3;
 			}
 		}
 		catch (SQLTimeoutException e)
@@ -590,7 +613,8 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("쿼리 실행중 문제가 발생했습니다.");
+			//System.out.println("연락처 삭제 도중 문제가 발생했습니다."+ e.getMessage());
+			result = -99;
 		}
 		finally
 		{

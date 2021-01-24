@@ -40,6 +40,6 @@ public class RelationVO
 	@Override
 	public String toString()
 	{
-		return String.format("[ %-20s %-20s ]", this.relation_name, this.realation_type);
+		return String.format("[ %-20s | %-20s ]", this.relation_name, this.realation_type);
 	}
 }

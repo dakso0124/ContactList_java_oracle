@@ -2,6 +2,7 @@ package vo;
 
 public class ContactInfoVO
 {
+	private int    memberID;		// unique
 	private String name;			// Not Null
 	private String phone;			// pk
 	private String address;			// not null
@@ -11,6 +12,7 @@ public class ContactInfoVO
 	
 	public ContactInfoVO()
 	{
+		memberID		= 0;
 		name			= null;
 		phone			= null;
 		address			= null;
@@ -19,22 +21,34 @@ public class ContactInfoVO
 		relation_name	= null;
 	}
 	
-	public ContactInfoVO(String name, String phone, String address, String relationType)
+	public ContactInfoVO(int memberid, String name, String phone, String address, String relationType)
 	{
+		this.memberID 		= memberid;
 		this.name 			= name;
 		this.phone			= phone;
 		this.address       	= address;
 		this.relation_type	= relationType;
 	}
 	
-	public ContactInfoVO(String name, String phone, String address, String join_date, String relationType, String relation_name)
+	public ContactInfoVO(int memberid, String name, String phone, String address, String join_date, String relationType, String relation_name)
 	{
+		this.memberID 		= memberid;
 		this.name 			= name;
 		this.phone			= phone;
 		this.address       	= address;
 		this.join_date		= join_date;
 		this.relation_type	= relationType;
 		this.relation_name	= relation_name;
+	}
+	
+	public void setMemberID(int memberID)
+	{
+		this.memberID = memberID;
+	}
+	
+	public int getMemberID()
+	{
+		return memberID;
 	}
 	
 	public String getName()
@@ -100,6 +114,6 @@ public class ContactInfoVO
 	@Override
 	public String toString()
 	{
-		return String.format("[ %-30s  %-30s  %-30s  %-30s  %-30s ]", this.name, this.phone, this.address, this.join_date, this.relation_name);
+		return String.format("[ %-30s | %-30s | %-30s | %-30s | %-30s ]", this.name, this.phone, this.address, this.join_date, this.relation_name);
 	}
 }

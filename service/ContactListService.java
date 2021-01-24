@@ -8,25 +8,18 @@ import vo.RelationVO;
 
 public class ContactListService
 {
-	private static ContactListService instance;
-	public static ContactListService getInstance()
-	{
-		if(instance == null)
-			instance = new ContactListService();
-		
-		return instance;
-	}
+	private ContactDAO m_cDAO;
 	
-	private ContactListService()
+	public ContactListService()
 	{
-		
+		m_cDAO = new ContactDAO();
 	}
 	
 	public ArrayList<ContactInfoVO> showAll()
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		
-		result = ContactDAO.getInstance().showAll();
+		result = m_cDAO.showAll();
 		
 		return result;
 	}
@@ -35,7 +28,7 @@ public class ContactListService
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		
-		result = ContactDAO.getInstance().searchContact(name);
+		result = m_cDAO.searchContact(name);
 		
 		return result;
 	}
@@ -44,7 +37,7 @@ public class ContactListService
 	{
 		ArrayList<RelationVO> result = new ArrayList<RelationVO>();
 		
-		result = ContactDAO.getInstance().getRelationData();
+		result = m_cDAO.getRelationData();
 		
 		return result;
 	}
@@ -53,7 +46,7 @@ public class ContactListService
 	{
 		int result = 0;
 		
-		result = ContactDAO.getInstance().addRelationType(typeName);
+		result = m_cDAO.addRelationType(typeName);
 		
 		return result;
 	}
@@ -62,16 +55,16 @@ public class ContactListService
 	{
 		int result = 0;
 		
-		result = ContactDAO.getInstance().insertContact(contact);
+		result = m_cDAO.insertContact(contact);
 		
 		return result;
 	}
 	
-	public int editContact(ContactInfoVO contact, String originPhone)
+	public int editContact(ContactInfoVO contact)
 	{
 		int result = 0;
 		
-		result = ContactDAO.getInstance().editContact(contact, originPhone);
+		result = m_cDAO.editContact(contact);
 		
 		return result;
 	}
@@ -80,7 +73,7 @@ public class ContactListService
 	{
 		int result = 0;
 		
-		result = ContactDAO.getInstance().removeContact(contact);
+		result = m_cDAO.removeContact(contact);
 		
 		return result;
 	}

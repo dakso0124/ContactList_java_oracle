@@ -1,37 +1,43 @@
 package controller;
 
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import java.util.NoSuchElementException;
+import exceptions.PhoneNumberException;
 import exceptions.WrongNumberException;
+
 import service.ContactListService;
+import viewer.ContactListViewer;
 import vo.ContactInfoVO;
 import vo.RelationVO;
 
 public class ContactController
-{
-	private static ContactController instance;
-	public static ContactController getInstance()
+{	
+	public ContactController()
 	{
-		if(instance == null)
-			instance = new ContactController();
-		
-		return instance;
+		init();
 	}
 	
-	private ContactController()
-	{
-		
-	}
+	private ContactListService m_service;
 	
  	private Scanner m_scanner;
+ 	private Logger m_logger;		// exception 및 예외 상황에서 사용할 logger
+ 	private String regEx = "^0(([1-6])([0-9])|2)(\\d{3}|\\d{4})(\\d{4})$"; // 전화번호 정규식 지역번호 및 핸드폰번호
  	
- 	public void init()
+ 	private void init()
  	{
  		m_scanner = new Scanner(System.in);
+ 		m_logger = Logger.getLogger(ContactController.class.getName());
+ 		
+ 		m_service = new ContactListService();
  	}
  	
+ 	// 프로그램 시작
 	public void StartContactProgram()
 	{
 		String temp = null;
@@ -67,20 +73,24 @@ public class ContactController
 					return;
 					
 				default :
-					System.out.println("메뉴를 확인하시고 원하는 숫자를 입력해 주세요.");
-					break;
+					throw new WrongNumberException();
 				}
+			}
+			catch(WrongNumberException e)
+			{
+				m_logger.warning("메뉴를 확인하시고 숫자를 정확히 입력해 주세요.");
+				continue;
 			}
 			catch(NoSuchElementException e)
 			{
-				e.printStackTrace();
-				System.out.println("");
+				m_logger.warning("아무것도 입력하지 않으셨습니다.");
+				continue;
 			}
-			catch(IllegalStateException e)
+			catch(IllegalStateException e)	// scanner 비정상적 종료
 			{
-				e.printStackTrace();
-				System.out.println("");
-			}
+				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+				System.exit(1);
+			}// 메인 메뉴 선택 try catch
 		}
 	}
 	
@@ -112,35 +122,35 @@ public class ContactController
 						break;
 						
 					default:
-						System.out.println("메뉴를 확인하시고 원하는 숫자를 입력해 주세요.");
-						continue;
+						throw new WrongNumberException();
 				}
 				
 				break;
 			}
+			catch(WrongNumberException e)
+			{
+				m_logger.warning("메뉴를 확인하시고 숫자를 정확히 입력해 주세요.");
+				continue;
+			}
 			catch(NoSuchElementException e)
 			{
-				e.printStackTrace();
-				System.out.println("");
+				m_logger.warning("아무것도 입력하지 않으셨습니다.");
+				continue;
 			}
-			catch(IllegalStateException e)
+			catch(IllegalStateException e)	// scanner 비정상적 종료
 			{
-				e.printStackTrace();
-				System.out.println("");
-			}
+				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+				System.exit(1);
+			}// 검색 메뉴 선택 try catch
 		}
 	}
 	
+	// 모든 연락처 출력
 	private void showAll()
 	{
-		System.out.println("연락처 목록----------------------------------");
-		ArrayList<ContactInfoVO> infoList = ContactListService.getInstance().showAll();
+		ArrayList<ContactInfoVO> infoList = m_service.showAll();
 		
-		for(int i = 0 ; i < infoList.size(); i++)
-		{
-			System.out.println(infoList.get(i).toString());
-		}
-		System.out.println("------------------------------------------");
+		ContactListViewer.getInstance().showList(infoList);	// viewer클래스를 통해 출력
 	}
 	
 	// '연락처 검색 -> 이름으로 검색' 메뉴를 통해 접근
@@ -152,29 +162,37 @@ public class ContactController
 		
 		while(true)
 		{
-			System.out.print("이름을 입력하세요(이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
-			temp = m_scanner.nextLine();
-			
-			if(temp.equals("0"))
+			try
 			{
-				System.out.println("이전 메뉴로 돌아갑니다.");
-				return;
-			}
+				System.out.print("이름을 입력하세요(이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
+				temp = m_scanner.nextLine();
+				
+				if(temp.equals("0"))
+				{
+					System.out.println("이전 메뉴로 돌아갑니다.");
+					return;
+				}
 
-			infoList = searchByName(temp);
-			
-			if(infoList.size() == 0)
+				infoList = searchByName(temp);
+				
+				if(infoList.size() == 0)
+				{
+					System.out.println("검색 결과가 없습니다");
+					continue;
+				}
+				
+				ContactListViewer.getInstance().showList(infoList);	// viewer클래스를 통해 출력
+			}
+			catch(NoSuchElementException e)
 			{
-				System.out.println("검색 결과가 없습니다");
+				m_logger.warning("아무것도 입력하지 않으셨습니다.");
 				continue;
 			}
-			
-			System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", infoList.size()));
-			for(int i = 0 ; i < infoList.size(); i++)
+			catch(IllegalStateException e)	// scanner 비정상적 종료
 			{
-				System.out.println( (i+1) + " : " + infoList.get(i).toString());
-			}
-			System.out.println("-----------------------------------------");
+				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+				System.exit(1);
+			}// 이름 검색 try catch
 			
 			break;
 		}
@@ -185,7 +203,7 @@ public class ContactController
 	{
 		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
 		
-		result = ContactListService.getInstance().searchContact(name);
+		result = m_service.searchContact(name);
 		
 		return result;
 	}
@@ -195,14 +213,13 @@ public class ContactController
 		System.out.println("연락처를 추가합니다.");
 		ContactInfoVO insert = entryContact(new ContactInfoVO());
 		
-		if(ContactListService.getInstance().addContact(insert) == 0)
-		{
-			System.out.println("연락처 추가에 실패했습니다.");
-		}
-		else
-		{
-			System.out.println("연락처 추가에 성공했습니다.");
-		}
+		// 년월일만 join_date로 입력 basic_iso_date = 'YYYYMMDD'
+		LocalDate curDate = LocalDate.now();
+		insert.setJoin_date(curDate.format(DateTimeFormatter.BASIC_ISO_DATE));
+		
+		int result = m_service.addContact(insert);
+		
+		ContactListViewer.getInstance().checkResult(result);		
 	}
 	
 	private void editContact()
@@ -215,7 +232,7 @@ public class ContactController
 		{
 			try
 			{
-				System.out.print("수정할 회원의 이름을 입력하세요 (이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
+				System.out.print("수정하실 회원의 이름을 입력하세요 (이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
 				temp = m_scanner.nextLine();
 				
 				if(temp.equals("0"))
@@ -231,51 +248,54 @@ public class ContactController
 					System.out.println("입력한 이름의 회원이 없습니다.");
 					continue;
 				}
-				else if(editList.size() == 1)
+				
+				ContactListViewer.getInstance().showList(editList);	// viewer클래스를 통해 출력
+				
+				if(editList.size() == 1)
 				{
-					System.out.println(String.format("1명의 연락처가 검색되었습니다-----------------", editList.size()));
-					System.out.println( editList.get(0).toString());
 					System.out.println("연락처를 수정합니다------------------------");
-					String temporary = editList.get(0).getPhone();
 					
 					entryContact(editList.get(0));
 					
-					result = ContactListService.getInstance().editContact(editList.get(0), temporary);
+					result = m_service.editContact(editList.get(0));
 				}
 				else
 				{
 					while(true)
 					{
-						System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", editList.size()));
-						for(int i = 0 ; i < editList.size(); i++)
-						{
-							System.out.println( (i+1) + " : " + editList.get(i).toString());
-						}
-						System.out.println("-----------------------------------------");
-						
 						try
 						{
 							System.out.print("수정하실 회원의 번호를 입력하세요 : ");
 							temp = m_scanner.nextLine();
 							
-							if(Integer.parseInt(temp) < 1 || editList.size() <= Integer.parseInt(temp))
+							if(Integer.parseInt(temp) < 1 || editList.size() < Integer.parseInt(temp))
 							{
-								System.out.println("숫자를 정확히 입력해 주세요.");
+								m_logger.warning("숫자를 정확히 입력해 주세요.");
 								continue;
 							}
 							else
 							{
 								System.out.println("연락처를 수정합니다.");
-								String originPhone = editList.get(Integer.parseInt(temp)-1).getPhone();
-								result = ContactListService.getInstance().editContact(editList.get(Integer.parseInt(temp)-1), originPhone );
+								ContactInfoVO editContact = entryContact(editList.get(Integer.parseInt(temp)-1));
+								
+								result = m_service.editContact(editContact);
 							}
 						}
 						catch(NumberFormatException e)
 						{
-							e.printStackTrace();
-							System.out.println("번호를 확인하신 후 숫자를 입력해 주세요.");
+							m_logger.warning("번호를 확인하신 후 숫자를 입력해 주세요.");
 							continue;
 						}
+						catch(NoSuchElementException e)
+						{
+							m_logger.warning("아무것도 입력하지 않으셨습니다.");
+							continue;
+						}
+						catch(IllegalStateException e)	// scanner 비정상적 종료
+						{
+							m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+							System.exit(1);
+						}// 연락처 list try catch
 						break;
 					}
 				}
@@ -284,25 +304,18 @@ public class ContactController
 			}
 			catch(NoSuchElementException e)
 			{
-				e.printStackTrace();
-				System.out.println("");
+				m_logger.warning("아무것도 입력하지 않으셨습니다. 이름을 입력해 주세요.");
+				continue;
 			}
-			catch(IllegalStateException e)
+			catch(IllegalStateException e)	// scanner 비정상적 종료
 			{
-				e.printStackTrace();
-				System.out.println("");
-			}
+				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+				System.exit(1);
+			}// 이름 입력 try catch
 			break;
 		}
 		
-		if(result == 0)
-		{
-			System.out.println("연락처 변경에 실패했습니다.");
-		}
-		else
-		{
-			System.out.println("연락처 변경에 실패했습니다.");
-		}
+		ContactListViewer.getInstance().checkResult(result);
 	}
 	
 	private void removeContact()
@@ -325,69 +338,75 @@ public class ContactController
 					System.out.println("입력하신 이름의 회원이 없습니다.");
 					continue;
 				}
-				else if(delList.size() == 1)
+				
+				ContactListViewer.getInstance().showList(delList);	// viewer클래스를 통해 출력
+				
+				if(delList.size() == 1)
 				{
-					System.out.println(String.format("1명의 연락처가 검색되었습니다-----------------", delList.size()));
-					System.out.println( delList.get(0).toString());
-					System.out.println("연락처를 삭제합니다------------------------");
-					result = ContactListService.getInstance().removeContact(delList.get(0));
+					System.out.println("연락처를 삭제합니다.");
+					result = m_service.removeContact(delList.get(0));
 				}
 				else
 				{
 					while(true)
 					{
-						System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", delList.size()));
-						for(int i = 0 ; i < delList.size(); i++)
-						{
-							System.out.println( (i+1) + " : " + delList.get(i).toString());
-						}
-						System.out.println("-----------------------------------------");
-						
 						try
 						{
 							System.out.print("삭제하실 회원의 번호를 입력하세요 : ");
 							temp = m_scanner.nextLine();
 							
-							if(Integer.parseInt(temp) < 1 || delList.size() <= Integer.parseInt(temp))
+							if(Integer.parseInt(temp) < 1 || delList.size() < Integer.parseInt(temp))
 							{
 								throw new WrongNumberException();
 							}
 							else
 							{
 								System.out.println("연락처를 삭제합니다.");
-								result = ContactListService.getInstance().removeContact((delList.get(Integer.parseInt(temp)-1)));
+								result = m_service.removeContact((delList.get(Integer.parseInt(temp)-1)));
 							}
 						}
 						catch(WrongNumberException e)
 						{
-							System.out.println("숫자를 정확히 입력해 주세요.");
+							m_logger.warning("메뉴를 확인하시고 숫자를 정확히 입력해 주세요.");
 							continue;
 						}
 						catch(NumberFormatException e)
 						{
-							e.printStackTrace();
-							System.out.println("번호를 확인하신 후 숫자를 입력해 주세요.");
+							m_logger.warning("번호를 확인하신 후 숫자를 입력해 주세요.");
 							continue;
 						}
+						catch(NoSuchElementException e)
+						{
+							m_logger.warning("아무것도 입력하지 않으셨습니다. 이름을 입력해 주세요.");
+							continue;
+						}
+						catch(IllegalStateException e) // scanner 비정상적 종료
+						{
+							m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+							System.exit(1);
+						}// 회원번호 try catch
 						break;
 					}
 				}
 			}
 			catch(NoSuchElementException e)
 			{
-				e.printStackTrace();
-				System.out.println("");
+				m_logger.warning("아무것도 입력하지 않으셨습니다. 이름을 입력해 주세요.");
+				continue;
 			}
-			catch(IllegalStateException e)
+			catch(IllegalStateException e) // scanner 비정상적 종료
 			{
-				e.printStackTrace();
-				System.out.println("");
-			}
+				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+				System.exit(1);
+			}// 회원 이름 try catch
+			
+			ContactListViewer.getInstance().checkResult(result);
 			
 			break;
 		}
 	}
 	
+	// 연락처 추가 & 수정 시 호출. set contact & return
 	private ContactInfoVO entryContact(ContactInfoVO contact)
 	{
 		String name			 = null;
@@ -396,7 +415,7 @@ public class ContactController
 		String relation_type = null;
 		String relation_name = null;
 		
-		int relation = 0;
+		int relation 		 = 0;
 		
 		while(true)
 		{
@@ -407,8 +426,38 @@ public class ContactController
 				
 				while(true)
 				{
-					System.out.print("전화번호를 입력하세요(숫자만 입력) : ");
-					phone = m_scanner.nextLine();
+					try
+					{
+						System.out.print("전화번호를 입력하세요(숫자만 입력) : ");
+						phone = m_scanner.nextLine();
+						
+						Integer.parseInt(phone);
+						
+						if(!phone.matches(regEx))	// 정규식으로 검사
+						{
+							throw new PhoneNumberException();
+						}
+					}
+					catch(PhoneNumberException e)	// 전화번호 에러
+					{
+						m_logger.warning("전화번호를 확인하시고 정확히 입력해 주세요.");
+						continue;
+					}
+					catch(NumberFormatException e) // Integer.parse
+					{
+						m_logger.warning("전화번호를 숫자로 정확히 입력해 주세요.");
+						continue;
+					}
+					catch(NoSuchElementException e)
+					{
+						m_logger.warning("아무것도 입력하지 않으셨습니다. 전화번호를 입력해 주세요.");
+						continue;
+					}
+					catch(IllegalStateException e) // scanner 비정상적 종료
+					{
+						m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+						System.exit(1);
+					}// 전화번호 입력 try catch
 
 					break;
 				}
@@ -420,45 +469,68 @@ public class ContactController
 				{
 					try
 					{
-						ArrayList<RelationVO> relations = ContactListService.getInstance().getRelations(); 
+						ArrayList<RelationVO> relations = m_service.getRelations();
 						
-						System.out.println("----------------------------------");
-						for(int i = 0 ; i < relations .size(); i++)
+						if(relations.size() == 0)
 						{
-							System.out.println((i+1) + " : " + relations.get(i).getRelation_name());
+							System.out.println("그룹이 없습니다. 추가해 주세요.");
 						}
-						System.out.println("----------------------------------");
-						System.out.print("관계를 선택해주세요 (관계 추가는 0을 선택해 주세요): ");
-						relation_type = m_scanner.nextLine();
-						
-						relation = Integer.parseInt(relation_type);
-						if(relation == 0)
+						else
 						{
-							boolean isExist = false;
+							System.out.println("----------------------------------");
+							for(int i = 0 ; i < relations .size(); i++)
+							{
+								System.out.println((i+1) + " : " + relations.get(i).getRelation_name());
+							}
+							System.out.println("----------------------------------");
+							System.out.print("그룹을 선택해주세요 (그룹 추가는 0을 선택해 주세요) : ");
+							relation_type = m_scanner.nextLine();
+							
+							relation = Integer.parseInt(relation_type);	
+						}
+						
+						if(relation == 0 || relations.size() == 0)	// 그룹 추가
+						{
 							while(true)
 							{
-								System.out.print("추가할 관계명을 입력하세요 : ");
-								relation_name = m_scanner.nextLine();
-								
-								for(int i = 0 ; i < relations.size() ; i++ )
+								try
 								{
-									if(relations.get(i).getRelation_name().equals(relation_name))
+									boolean isExist = false;
+									
+									System.out.print("추가할 그룹명을 입력하세요 : ");
+									relation_name = m_scanner.nextLine();
+									
+									for(int i = 0 ; i < relations.size() ; i++ )
 									{
-										isExist = true;
-										break;
+										if(relations.get(i).getRelation_name().equals(relation_name))
+										{
+											isExist = true;
+											break;
+										}
+									}
+									
+									if(!isExist)
+									{
+										m_service.addRelationType(relation_name);
+										relation_type = String.format("%03d", relations.size()+1);
+									}
+									else
+									{
+										System.out.println("입력하신 그룹명이 이미 존재합니다. 다시 입력해 주세요.");
+										continue;
 									}
 								}
-								
-								if(!isExist)
+								catch(NoSuchElementException e)	// nextline
 								{
-									ContactListService.getInstance().addRelationType(relation_name);
-									relation_type = String.format("%03d", relations.size()+1);
-								}
-								else
-								{
-									System.out.println("입력하신 관계명이 이미 존재합니다. 다시 입력해 주세요.");
+									m_logger.warning("아무것도 입력하지 않으셨습니다. 메뉴를 확인하시고 입력해 주세요.");
 									continue;
 								}
+								catch(IllegalStateException e)	// scanner 비정상적 종료
+								{
+									m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+									System.exit(1);
+								}//// 그룹명 추가 try catch
+								
 								break;
 							}
 						}
@@ -472,39 +544,40 @@ public class ContactController
 							relation_name = relations.get(relation -1).getRelation_name();	
 						}
 					}
-					catch(WrongNumberException e)
+					catch(WrongNumberException e)	// array index out of bound
 					{
-						System.out.println("숫자를 정확히 입력해 주세요.");
+						m_logger.warning("메뉴를 확인하시고 숫자를 정확히 입력해 주세요.");
 						continue;
 					}
-					catch(NumberFormatException e)
+					catch(NumberFormatException e)	// Integer.parse relation 
 					{
-						
+						m_logger.warning("메뉴를 확인하시고 숫자를 정확히 입력해 주세요.");
+						continue;
 					}
-					catch(NoSuchElementException e)
+					catch(NoSuchElementException e)	// nextline
 					{
-						e.printStackTrace();
-						System.out.println("");
+						m_logger.warning("아무것도 입력하지 않으셨습니다. 메뉴를 확인하시고 입력해 주세요.");
+						continue;
 					}
-					catch(IllegalStateException e)
+					catch(IllegalStateException e)	// scanner 비정상적 종료
 					{
-						e.printStackTrace();
-						System.out.println("");
-					}
+						m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+						System.exit(1);
+					}/// 그룹 선택 try catch
 					
 					break;
 				}
 			}
-			catch(NoSuchElementException e)
+			catch(NoSuchElementException e) // nextline
 			{
-				e.printStackTrace();
-				System.out.println("");
+				m_logger.warning("아무것도 입력하지 않으셨습니다. 메뉴를 확인하시고 정확히 입력해 주세요.");
+				continue;
 			}
-			catch(IllegalStateException e)
+			catch(IllegalStateException e)	// scanner 비정상적 종료
 			{
-				e.printStackTrace();
-				System.out.println("");
-			}
+				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+				System.exit(1);
+			}// 이름, 주소 try catch
 			break;
 		}
 		
@@ -516,4 +589,6 @@ public class ContactController
 		
 		return contact;
 	}
+	
+	
 }
