@@ -142,12 +142,12 @@ public class ContactDAO // db access object
 		finally
 		{
 			close(conn, pstmt);
-			addContactListPhonePK();
+			addContactListMemberidPK();
 		}
 	}
 	
 	// CONTACTLIST - phone 컬럼에 PK 지정
-	private void addContactListPhonePK()
+	private void addContactListMemberidPK()
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
@@ -159,10 +159,10 @@ public class ContactDAO // db access object
 			conn = getConnection();
 			pstmt = null;
 			sql.append("ALTER TABLE CONTACTLIST										");
-			sql.append("  ADD CONSTRAINT pk_contactlist_phone PRIMARY KEY(phone)	");
+			sql.append("  ADD CONSTRAINT pk_contactlist_memberid PRIMARY KEY(memberid)	");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST phone column PK 지정에 성공했습니다.");
+			System.out.println("CONTACTLIST memberid column PK 지정에 성공했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -175,12 +175,12 @@ public class ContactDAO // db access object
 		finally
 		{
 			close(conn, pstmt);
-			addContactListMemberidUK();
+			addContactListPhoneUK();
 		}
 	}
 	
 	// CONTACTLIST - memberid 컬럼에 UK지정
-	private void addContactListMemberidUK()
+	private void addContactListPhoneUK()
 	{
 		conn = getConnection();
 		PreparedStatement pstmt = null;
@@ -192,10 +192,10 @@ public class ContactDAO // db access object
 			conn = getConnection();
 			pstmt = null;
 			sql.append("ALTER TABLE CONTACTLIST										");
-			sql.append("  ADD CONSTRAINT uk_contactlist_memberid UNIQUE (memberid)	");
+			sql.append("  ADD CONSTRAINT uk_contactlist_phone UNIQUE (phone)	");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST memberid column UK 지정에 성공했습니다.");
+			System.out.println("CONTACTLIST phone column UK 지정에 성공했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -345,7 +345,7 @@ public class ContactDAO // db access object
 		catch(SQLException e)
 		{
 			//System.out.println("관계 테이블을 가져오던 도중 문제가 발생하였습니다." + e.getMessage());
-			ContactListViewer.getInstance().checkResult(-96);
+			//ContactListViewer.getInstance().checkResult(-96);
 		}
 		finally
 		{
@@ -396,7 +396,7 @@ public class ContactDAO // db access object
 		catch(SQLException e)
 		{
 			//System.out.println("전체 멤버 검색중 문제가 발생하였습니다." + e.getMessage());
-			ContactListViewer.getInstance().checkResult(-97);
+			//ContactListViewer.getInstance().checkResult(-97);
 		}
 		finally
 		{
@@ -450,7 +450,7 @@ public class ContactDAO // db access object
 		catch(SQLException e)
 		{
 			//System.out.println("멤버 검색 도중 문제가 발생하였습니다." + e.getMessage());
-			ContactListViewer.getInstance().checkResult(-98);
+			//ContactListViewer.getInstance().checkResult(-98);
 		}
 		finally
 		{
@@ -473,8 +473,8 @@ public class ContactDAO // db access object
 		// 회원번호는 가장큰수를 select하여 거기에 +1로 지정
 		sql.append("INSERT INTO CONTACTLIST(memberid, name, phone, address, relation_type, join_date)	");
 		sql.append("VALUES( (SELECT NVL(MAX(memberid) + 1, 1)											"); 
-		sql.append("		  FROM CONTACTLIST), ? , ? , ? , ? , ?)										");
-		
+		sql.append("		  FROM CONTACTLIST), ? , ? , ? , ? , TO_CHAR(SYSDATE, 'YYYYMMDD'))			");
+
 		
 		try
 		{
@@ -483,7 +483,6 @@ public class ContactDAO // db access object
 			pstmt.setString(2, contact.getPhone());
 			pstmt.setString(3, contact.getAddress());
 			pstmt.setString(4, contact.getRelation_type());
-			pstmt.setString(5, contact.getJoin_date());
 			
 			result = pstmt.executeUpdate();
 			
