@@ -1,14 +1,10 @@
 package controller;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import java.util.NoSuchElementException;
-import exceptions.PhoneNumberException;
 import exceptions.WrongNumberException;
 
 import service.ContactListService;
@@ -24,10 +20,10 @@ public class ContactController
 	}
 	
 	private ContactListService m_service;
+	private ContactListViewer m_viewer;
 	
  	private Scanner m_scanner;
  	private Logger m_logger;		// exception 및 예외 상황에서 사용할 logger
- 	private String regEx = "^0(([1-6])([0-9])|2)(\\d{3}|\\d{4})(\\d{4})$"; // 전화번호 정규식 지역번호 및 핸드폰번호
  	
  	private void init()
  	{
@@ -35,6 +31,7 @@ public class ContactController
  		m_logger = Logger.getLogger(ContactController.class.getName());
  		
  		m_service = new ContactListService();
+ 		m_viewer = new ContactListViewer();
  	}
  	
  	// 프로그램 시작
@@ -51,29 +48,29 @@ public class ContactController
 				
 				switch(temp)
 				{
-				case "1":
-					searchContact();
-					break;
-					
-				case "2":
-					addContact();
-					break;
-					
-				case "3":
-					editContact();
-					break;
-					
-				case "4":
-					removeContact();
-					break;
-					
-				case "5":
-					System.out.println("프로그램을 종료합니다.");
-					m_scanner.close();
-					return;
-					
-				default :
-					throw new WrongNumberException();
+					case "1":
+						searchContact();
+						break;
+						
+					case "2":
+						addContact();
+						break;
+						
+					case "3":
+						editContact();
+						break;
+						
+					case "4":
+						removeContact();
+						break;
+						
+					case "5":
+						System.out.println("프로그램을 종료합니다.");
+						m_scanner.close();
+						return;
+						
+					default :
+						throw new WrongNumberException();
 				}
 			}
 			catch(WrongNumberException e)
@@ -150,7 +147,7 @@ public class ContactController
 	{
 		ArrayList<ContactInfoVO> infoList = m_service.showAll();
 		
-		ContactListViewer.getInstance().showList(infoList);	// viewer클래스를 통해 출력
+		m_viewer.showContactList(infoList);	// viewer클래스를 통해 출력
 	}
 	
 	// '연락처 검색 -> 이름으로 검색' 메뉴를 통해 접근
@@ -173,7 +170,7 @@ public class ContactController
 					return;
 				}
 
-				infoList = searchByName(temp);
+				infoList = m_service.searchContact(temp);
 				
 				if(infoList.size() == 0)
 				{
@@ -181,7 +178,7 @@ public class ContactController
 					continue;
 				}
 				
-				ContactListViewer.getInstance().showList(infoList);	// viewer클래스를 통해 출력
+				m_viewer.showContactList(infoList);	// viewer클래스를 통해 출력
 			}
 			catch(NoSuchElementException e)
 			{
@@ -198,28 +195,40 @@ public class ContactController
 		}
 	}
 	
-	// 실제 이름으로 검색해서 arrlist 리턴
-	private ArrayList<ContactInfoVO> searchByName(String name)
-	{
-		ArrayList<ContactInfoVO> result = new ArrayList<ContactInfoVO>();
-		
-		result = m_service.searchContact(name);
-		
-		return result;
-	}
-	
 	private void addContact()
 	{
-		System.out.println("연락처를 추가합니다.");
-		ContactInfoVO insert = entryContact(new ContactInfoVO());
-		
-		// 년월일만 join_date로 입력 basic_iso_date = 'YYYYMMDD'
-		LocalDate curDate = LocalDate.now();
-		insert.setJoin_date(curDate.format(DateTimeFormatter.BASIC_ISO_DATE));
-		
-		int result = m_service.addContact(insert);
-		
-		ContactListViewer.getInstance().checkResult(result);		
+		while(true)
+		{
+			System.out.println("연락처를 추가합니다.");
+			ContactInfoVO insert = entryContact(new ContactInfoVO());
+			
+			int result = m_service.addContact(insert);
+			
+			m_viewer.checkResult(result);
+			
+			if(result < 0)
+			{
+				try
+				{
+					System.out.print("다시 입력하시겠습니까? Y/N : ");
+					if(m_scanner.nextLine().toUpperCase().equals("Y"))
+					{
+						continue;
+					}
+				}
+				catch(NoSuchElementException e)
+				{
+					m_logger.warning("아무것도 입력하지 않으셨습니다. 메인 메뉴로 돌아갑니다.");
+					break;
+				}
+				catch(IllegalStateException e)	// scanner 비정상적 종료
+				{
+					m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+					System.exit(1);
+				}// 이름 검색 try catch
+			}
+			break;
+		}
 	}
 	
 	private void editContact()
@@ -241,7 +250,7 @@ public class ContactController
 					return;
 				}
 				
-				ArrayList<ContactInfoVO> editList = searchByName(temp);
+				ArrayList<ContactInfoVO> editList = m_service.searchContact(temp);
 				
 				if(editList.size() == 0)
 				{
@@ -249,7 +258,7 @@ public class ContactController
 					continue;
 				}
 				
-				ContactListViewer.getInstance().showList(editList);	// viewer클래스를 통해 출력
+				m_viewer.showContactList(editList);	// viewer클래스를 통해 출력
 				
 				if(editList.size() == 1)
 				{
@@ -312,10 +321,32 @@ public class ContactController
 				m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
 				System.exit(1);
 			}// 이름 입력 try catch
+			
+			m_viewer.checkResult(result);
+
+			if(result < 0)
+			{
+				try
+				{
+					System.out.print("다시 입력하시겠습니까? Y/N : ");
+					if(m_scanner.nextLine().toUpperCase().equals("Y"))
+					{
+						continue;
+					}
+				}
+				catch(NoSuchElementException e)
+				{
+					m_logger.warning("아무것도 입력하지 않으셨습니다. 메인 메뉴로 돌아갑니다.");
+					break;
+				}
+				catch(IllegalStateException e)	// scanner 비정상적 종료
+				{
+					m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
+					System.exit(1);
+				}// 이름 검색 try catch
+			}
 			break;
 		}
-		
-		ContactListViewer.getInstance().checkResult(result);
 	}
 	
 	private void removeContact()
@@ -331,7 +362,7 @@ public class ContactController
 				System.out.print("이름을 입력하세요 (이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
 				temp = m_scanner.nextLine();
 				
-				ArrayList<ContactInfoVO> delList = searchByName(temp);
+				ArrayList<ContactInfoVO> delList = m_service.searchContact(temp);
 				
 				if(delList.size() == 0)
 				{
@@ -339,7 +370,7 @@ public class ContactController
 					continue;
 				}
 				
-				ContactListViewer.getInstance().showList(delList);	// viewer클래스를 통해 출력
+				m_viewer.showContactList(delList);	// viewer클래스를 통해 출력
 				
 				if(delList.size() == 1)
 				{
@@ -384,7 +415,7 @@ public class ContactController
 						{
 							m_logger.warning("프로그램에 문제가 생겨 종료합니다.");
 							System.exit(1);
-						}// 회원번호 try catch
+						}// 검색 결과 try catch
 						break;
 					}
 				}
@@ -400,7 +431,7 @@ public class ContactController
 				System.exit(1);
 			}// 회원 이름 try catch
 			
-			ContactListViewer.getInstance().checkResult(result);
+			m_viewer.checkResult(result);
 			
 			break;
 		}
@@ -431,22 +462,15 @@ public class ContactController
 						System.out.print("전화번호를 입력하세요(숫자만 입력) : ");
 						phone = m_scanner.nextLine();
 						
-						Integer.parseInt(phone);
-						
-						if(!phone.matches(regEx))	// 정규식으로 검사
+						switch(m_service.checkPhoneNumber(phone, contact.getMemberID()))
 						{
-							throw new PhoneNumberException();
+							case 1:
+								System.out.println("전화번호를 확인하시고 정확히 입력해 주세요.");
+								continue;
+							case 2:
+								System.out.println("이미 존재하는 전화번호입니다. 다시 확인후 입력해 주세요.");
+								continue;
 						}
-					}
-					catch(PhoneNumberException e)	// 전화번호 에러
-					{
-						m_logger.warning("전화번호를 확인하시고 정확히 입력해 주세요.");
-						continue;
-					}
-					catch(NumberFormatException e) // Integer.parse
-					{
-						m_logger.warning("전화번호를 숫자로 정확히 입력해 주세요.");
-						continue;
 					}
 					catch(NoSuchElementException e)
 					{
@@ -477,12 +501,8 @@ public class ContactController
 						}
 						else
 						{
-							System.out.println("----------------------------------");
-							for(int i = 0 ; i < relations .size(); i++)
-							{
-								System.out.println((i+1) + " : " + relations.get(i).getRelation_name());
-							}
-							System.out.println("----------------------------------");
+							m_viewer.showRelationList(relations);	// 그룹 리스트 출력
+							
 							System.out.print("그룹을 선택해주세요 (그룹 추가는 0을 선택해 주세요) : ");
 							relation_type = m_scanner.nextLine();
 							

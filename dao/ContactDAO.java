@@ -7,8 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
-import viewer.ContactListViewer;
 import vo.ContactInfoVO;
 import vo.RelationVO;
 
@@ -98,11 +98,11 @@ public class ContactDAO // db access object
 		}
 		catch (SQLTimeoutException e)
 		{
-			System.out.println("TimeOut Exception 발생");
+			Logger.getGlobal().warning("TimeOut Exception 발생");
 		}
 		catch (SQLException e)
 		{
-			System.out.println("CONTACTLIST 테이블 생성 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("CONTACTLIST 테이블 생성 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -133,11 +133,11 @@ public class ContactDAO // db access object
 		} 
 		catch (SQLTimeoutException e)
 		{
-			System.out.println("TimeOut Exception 발생");
+			Logger.getGlobal().warning("TimeOut Exception 발생");
 		} 
 		catch (SQLException e)
 		{
-			System.out.println("RELATION 테이블 생성 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("RELATION 테이블 생성 도중 문제가 발생했습니다." + e.getMessage());
 		} 
 		finally
 		{
@@ -146,7 +146,7 @@ public class ContactDAO // db access object
 		}
 	}
 	
-	// CONTACTLIST - phone 컬럼에 PK 지정
+	// CONTACTLIST - memberid 컬럼에 PK 지정
 	private void addContactListMemberidPK()
 	{
 		conn = getConnection();
@@ -158,7 +158,7 @@ public class ContactDAO // db access object
 		{
 			conn = getConnection();
 			pstmt = null;
-			sql.append("ALTER TABLE CONTACTLIST										");
+			sql.append("ALTER TABLE CONTACTLIST											");
 			sql.append("  ADD CONSTRAINT pk_contactlist_memberid PRIMARY KEY(memberid)	");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
@@ -166,11 +166,11 @@ public class ContactDAO // db access object
 		}
 		catch (SQLTimeoutException e)
 		{
-			System.out.println("TimeOut Exception 발생");
+			Logger.getGlobal().warning("TimeOut Exception 발생");
 		}
 		catch (SQLException e)
 		{
-			System.out.println("CONTACTLIST PK 지정 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("CONTACTLIST PK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -179,7 +179,7 @@ public class ContactDAO // db access object
 		}
 	}
 	
-	// CONTACTLIST - memberid 컬럼에 UK지정
+	// CONTACTLIST - phone 컬럼에 Unique지정
 	private void addContactListPhoneUK()
 	{
 		conn = getConnection();
@@ -199,11 +199,11 @@ public class ContactDAO // db access object
 		}
 		catch (SQLTimeoutException e)
 		{
-			System.out.println("TimeOut Exception 발생");
+			Logger.getGlobal().warning("TimeOut Exception 발생");
 		}
 		catch (SQLException e)
 		{
-			System.out.println("CONTACTLIST UK 지정 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("CONTACTLIST UK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -230,11 +230,11 @@ public class ContactDAO // db access object
 		}
 		catch (SQLTimeoutException e)
 		{
-			System.out.println("TimeOut Exception 발생");
+			Logger.getGlobal().warning("TimeOut Exception 발생");
 		}
 		catch (SQLException e)
 		{
-			System.out.println("RELATION PK 지정 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("RELATION PK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -243,7 +243,7 @@ public class ContactDAO // db access object
 		}
 	}
 
-	// CONTACTLIST relation_type에 FK 지정 ref - RELATION relation_type 참조 FK 지정
+	// CONTACTLIST relation_type에 FK 지정, RELATION relation_type Reference 참조 지정
 	private void addContactListTypeFK()
 	{
 		conn = getConnection();
@@ -258,15 +258,15 @@ public class ContactDAO // db access object
 			sql.append("REFERENCES RELATION(relation_type)											");
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST relation_type FK - RELATION relation_type FK 지정에 성공했습니다.");
+			System.out.println("CONTACTLIST relation_type FK - RELATION relation_type Reference 지정에 성공했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
-			System.out.println("TimeOut Exception 발생");
+			Logger.getGlobal().warning("TimeOut Exception 발생");
 		}
 		catch (SQLException e)
 		{
-			System.out.println("CONTACTLIST FK 지정 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("CONTACTLIST FK 지정 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -296,7 +296,6 @@ public class ContactDAO // db access object
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, typeName);
 			result = pstmt.executeUpdate();
-
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -304,7 +303,7 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			System.out.println("RELATION 컬럼 추가 도중 문제가 발생했습니다." + e.getMessage());
+			Logger.getGlobal().warning("RELATION 컬럼 추가 도중 문제가 발생했습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -344,8 +343,7 @@ public class ContactDAO // db access object
 		}
 		catch(SQLException e)
 		{
-			//System.out.println("관계 테이블을 가져오던 도중 문제가 발생하였습니다." + e.getMessage());
-			//ContactListViewer.getInstance().checkResult(-96);
+			Logger.getGlobal().warning("관계 테이블을 가져오던 도중 문제가 발생하였습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -395,8 +393,7 @@ public class ContactDAO // db access object
 		}
 		catch(SQLException e)
 		{
-			//System.out.println("전체 멤버 검색중 문제가 발생하였습니다." + e.getMessage());
-			//ContactListViewer.getInstance().checkResult(-97);
+			Logger.getGlobal().warning("연락처 검색중 문제가 발생하였습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -449,8 +446,7 @@ public class ContactDAO // db access object
 		}
 		catch(SQLException e)
 		{
-			//System.out.println("멤버 검색 도중 문제가 발생하였습니다." + e.getMessage());
-			//ContactListViewer.getInstance().checkResult(-98);
+			Logger.getGlobal().warning("연락처 검색 도중 문제가 발생하였습니다." + e.getMessage());
 		}
 		finally
 		{
@@ -475,7 +471,6 @@ public class ContactDAO // db access object
 		sql.append("VALUES( (SELECT NVL(MAX(memberid) + 1, 1)											"); 
 		sql.append("		  FROM CONTACTLIST), ? , ? , ? , ? , TO_CHAR(SYSDATE, 'YYYYMMDD'))			");
 
-		
 		try
 		{
 			pstmt = conn.prepareStatement(sql.toString());
@@ -497,18 +492,14 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			//System.out.println("연락처 추가 도중 문제가 발생했습니다."+ e.getMessage());
-			if(e.getMessage().contains("PK_CONTACTLIST_PHONE"))	// pk 위반
+			if(e.getMessage().contains("value too large"))	// value overflow
 			{
 				result = -1;
-			}
-			else if(e.getMessage().contains("value too large"))	// value overflow
-			{
-				result = -2;
 			}
 			else
 			{
 				result = -99;
+				Logger.getGlobal().warning("연락처 추가 도중 문제가 발생하였습니다." + e.getMessage());	
 			}
 		}
 		finally
@@ -559,18 +550,14 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			//System.out.println("연락처 수정 도중 문제가 발생했습니다."+ e.getMessage());
-			if(e.getMessage().contains("PK_CONTACTLIST_PHONE"))	// pk 위반
+			if(e.getMessage().contains("value too large"))	// value overflow
 			{
 				result = -1;
-			}
-			else if(e.getMessage().contains("value too large"))	// value overflow
-			{
-				result = -2;
 			}
 			else
 			{
 				result = -99;
+				Logger.getGlobal().warning("연락처 수정 도중 문제가 발생했습니다." + e.getMessage());
 			}
 		}
 		finally
@@ -612,8 +599,53 @@ public class ContactDAO // db access object
 		}
 		catch (SQLException e)
 		{
-			//System.out.println("연락처 삭제 도중 문제가 발생했습니다."+ e.getMessage());
+			Logger.getGlobal().warning("연락처 삭제 도중 문제가 발생했습니다."+ e.getMessage());
 			result = -99;
+		}
+		finally
+		{
+			close(conn, pstmt);
+		}
+		
+		return result;
+	}
+	
+	// 전화번호 중복체크
+	// param phone : 입력한 전화번호
+	// param memberID : 연락처 수정시의 멤버ID
+	public int checkPhoneNum(String phone, int memberID)
+	{
+		int result = 0;
+		
+		conn = getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("SELECT COUNT(phone) AS count	");
+		sql.append("  FROM contactlist				");
+		sql.append(" WHERE phone = ?				");
+		sql.append("   AND memberid != ?			");
+				
+		try
+		{
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, phone);
+			pstmt.setInt(2, memberID);
+			
+			rs = pstmt.executeQuery();
+			
+			rs.next();
+			result = rs.getInt("count");	// 중복이라면 1, 중복이 아니라면 0
+		}
+		catch (SQLTimeoutException e)
+		{
+			System.out.println("TimeOut Exception");
+		}
+		catch (SQLException e)
+		{
+			System.out.println("전화번호 검색 도중 문제가 발생했습니다."+ e.getMessage());
 		}
 		finally
 		{

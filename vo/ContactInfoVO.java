@@ -114,6 +114,6 @@ public class ContactInfoVO
 	@Override
 	public String toString()
 	{
-		return String.format("[ %-30s | %-30s | %-30s | %-30s | %-30s ]", this.name, this.phone, this.address, this.join_date, this.relation_name);
+		return String.format("[ 이름 : %-30s | 전화번호 : %-30s | 주소 : %-40s | 가입일 : %-10s | 그룹 : %-30s ]", this.name, this.phone, this.address, this.join_date, this.relation_name);
 	}
 }

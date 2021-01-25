@@ -8,6 +8,8 @@ public class ContactListMain
 {
 	public static void main(String[] args)
 	{
+//		ContactDAO dao = new ContactDAO();
+//		dao.createContactListTable();
 		ContactController m_controller = new ContactController();
 		
 		System.out.println("연락처 관리 프로그램입니다.");

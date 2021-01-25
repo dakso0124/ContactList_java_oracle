@@ -4,24 +4,17 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import vo.ContactInfoVO;
+import vo.RelationVO;
 
 public class ContactListViewer {
-	private static ContactListViewer instance;
-	public static ContactListViewer getInstance()
-	{
-		if(instance == null)
-		{
-			instance = new ContactListViewer();
-		}
-		return instance;
-	}
-	
-	private ContactListViewer()
+
+	public ContactListViewer()
 	{
 		
 	}
 	
-	public void showList(ArrayList<ContactInfoVO> showList)
+	// 연락처 리스트
+	public void showContactList(ArrayList<ContactInfoVO> showList)
 	{
 		System.out.println(String.format("검색 결과 %d명이 검색되었습니다.-----------------", showList.size()));
 		for(int i = 0 ; i < showList.size(); i++)
@@ -31,7 +24,19 @@ public class ContactListViewer {
 		System.out.println("-----------------------------------------");
 	}
 	
-	// 추가, 수정, 삭제 시 메세지 확인
+	// 그룹 리스트
+	public void showRelationList(ArrayList<RelationVO> showList)
+	{
+		System.out.println("-----------------------------------------");
+		for(int i = 0 ; i < showList.size(); i++)
+		{
+			System.out.println( (i+1) + " : " + showList.get(i).toString());
+		}
+		System.out.println("-----------------------------------------");
+	}
+	
+	// 추가, 수정, 삭제 시 결과 확인
+	// DAO에서 성공 or 추가, 수정시 err 결과 출력
 	public void checkResult(int result)
 	{
 		switch(result)
@@ -46,22 +51,7 @@ public class ContactListViewer {
 			System.out.println("연락처를 삭제했습니다.");
 			break;
 		case -1:
-			Logger.getGlobal().warning("이미 존재하는 전화번호입니다. 번호를 다시한번 확인해 주세요.");
-			break;
-		case -2:
-			Logger.getGlobal().warning("입력한 정보가 너무 깁니다.");
-			break;
-		case -96:
-			Logger.getGlobal().warning("관계 테이블을 가져오던 도중 문제가 발생하였습니다.");
-			break;
-		case -97:
-			Logger.getGlobal().warning("전체 멤버 검색중 문제가 발생하였습니다.");
-			break;
-		case -98:
-			Logger.getGlobal().warning("멤버 검색 도중 문제가 발생하였습니다.");
-			break;
-		case -99:
-			Logger.getGlobal().warning("데이터를 운용하던 중 에러가 발생했습니다.");
+			Logger.getGlobal().warning("입력하신 정보중 너무 길게 작성하신 정보가 있습니다.");
 			break;
 		}
 	}
