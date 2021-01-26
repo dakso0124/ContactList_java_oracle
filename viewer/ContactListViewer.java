@@ -36,23 +36,26 @@ public class ContactListViewer {
 	}
 	
 	// 추가, 수정, 삭제 시 결과 확인
-	// DAO에서 성공 or 추가, 수정시 err 결과 출력
+	// DAO에서 작업 성공 or 실패시 결과 출력
 	public void checkResult(int result)
 	{
 		switch(result)
 		{
-		case 1:
-			System.out.println("연락처를 추가했습니다.");
-			break;
-		case 2:
-			System.out.println("연락처를 수정했습니다.");
-			break;
-		case 3:
-			System.out.println("연락처를 삭제했습니다.");
-			break;
-		case -1:
-			Logger.getGlobal().warning("입력하신 정보중 너무 길게 작성하신 정보가 있습니다.");
-			break;
+			case 0:
+				System.out.println("작업에 실패했습니다.");
+				break;
+			case 1:
+				System.out.println("연락처를 추가했습니다.");
+				break;
+			case 2:
+				System.out.println("연락처를 수정했습니다.");
+				break;
+			case 3:
+				System.out.println("연락처를 삭제했습니다.");
+				break;
+			case -1:
+				System.out.println("입력하신 정보중 너무 길게 작성하신 정보가 있습니다.");
+				break;
 		}
 	}
 }

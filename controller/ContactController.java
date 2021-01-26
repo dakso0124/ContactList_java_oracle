@@ -22,7 +22,7 @@ public class ContactController
 	private ContactListService m_service;
 	private ContactListViewer m_viewer;
 	
- 	private Scanner m_scanner;
+ 	private Scanner m_scanner;		// 유저 입력
  	private Logger m_logger;		// exception 및 예외 상황에서 사용할 logger
  	
  	private void init()
@@ -34,7 +34,7 @@ public class ContactController
  		m_viewer = new ContactListViewer();
  	}
  	
- 	// 프로그램 시작
+ 	// 프로그램 시작, -99 입력시 기본 테이블 생성
 	public void StartContactProgram()
 	{
 		String temp = null;
@@ -69,6 +69,9 @@ public class ContactController
 						m_scanner.close();
 						return;
 						
+					case "-99":						// 만들어 놓은거 빼기 아쉬워서 넣어봤습니다....
+						m_service.createTables();
+						break;
 					default :
 						throw new WrongNumberException();
 				}
@@ -91,6 +94,7 @@ public class ContactController
 		}
 	}
 	
+	// 검색 메뉴
 	private void searchContact()
 	{
 		String temp = null;
@@ -231,6 +235,7 @@ public class ContactController
 		}
 	}
 	
+	// 연락처 수정
 	private void editContact()
 	{
 		String temp = null;
@@ -308,8 +313,6 @@ public class ContactController
 						break;
 					}
 				}
-				
-				break;
 			}
 			catch(NoSuchElementException e)
 			{
@@ -349,6 +352,7 @@ public class ContactController
 		}
 	}
 	
+	// 연락처 삭제
 	private void removeContact()
 	{
 		int result = 0;
@@ -362,6 +366,12 @@ public class ContactController
 				System.out.print("이름을 입력하세요 (이전 메뉴로 돌아가시려면 0을 입력하세요) : ");
 				temp = m_scanner.nextLine();
 				
+				if(temp.equals("0"))
+				{
+					System.out.println("이전 메뉴로 돌아갑니다.");
+					return;
+				}
+				
 				ArrayList<ContactInfoVO> delList = m_service.searchContact(temp);
 				
 				if(delList.size() == 0)
@@ -372,12 +382,12 @@ public class ContactController
 				
 				m_viewer.showContactList(delList);	// viewer클래스를 통해 출력
 				
-				if(delList.size() == 1)
+				if(delList.size() == 1)				// 검색 결과 1명이면 삭제
 				{
 					System.out.println("연락처를 삭제합니다.");
 					result = m_service.removeContact(delList.get(0));
 				}
-				else
+				else								// 검색결과 1명 이상이면 선택하여 삭제
 				{
 					while(true)
 					{
@@ -493,7 +503,7 @@ public class ContactController
 				{
 					try
 					{
-						ArrayList<RelationVO> relations = m_service.getRelations();
+						ArrayList<RelationVO> relations = m_service.getRelations();		// 그룹 리스트
 						
 						if(relations.size() == 0)
 						{
@@ -520,7 +530,7 @@ public class ContactController
 									System.out.print("추가할 그룹명을 입력하세요 : ");
 									relation_name = m_scanner.nextLine();
 									
-									for(int i = 0 ; i < relations.size() ; i++ )
+									for(int i = 0 ; i < relations.size() ; i++ )	// 위에서 받아온 그룹 리스트와 비교
 									{
 										if(relations.get(i).getRelation_name().equals(relation_name))
 										{

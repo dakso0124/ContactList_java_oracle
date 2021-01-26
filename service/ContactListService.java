@@ -19,6 +19,13 @@ public class ContactListService
 		m_cDAO = new ContactDAO();
 	}
 	
+	// 기본 테이블 생성
+	public void createTables()
+	{
+		m_cDAO.createContactListTable();
+	}
+	
+	// 모든 연락처 보기
 	public ArrayList<ContactInfoVO> showAll()
 	{
 		ArrayList<ContactInfoVO> result = m_cDAO.showAll();
@@ -26,6 +33,7 @@ public class ContactListService
 		return result;
 	}
 	
+	// 이름으로 연락처 찾기
 	public ArrayList<ContactInfoVO> searchContact(String name)
 	{
 		ArrayList<ContactInfoVO> result = m_cDAO.searchContact(name);
@@ -33,6 +41,7 @@ public class ContactListService
 		return result;
 	}
 	
+	// 그룹 리스트 가져오기
 	public ArrayList<RelationVO> getRelations()
 	{
 		ArrayList<RelationVO> result = m_cDAO.getRelationData();
@@ -40,6 +49,7 @@ public class ContactListService
 		return result;
 	}
 	
+	// 그룹 추가
 	public int addRelationType(String typeName)
 	{
 		int result = m_cDAO.addRelationType(typeName);
@@ -47,6 +57,7 @@ public class ContactListService
 		return result;
 	}
 	
+	// 연락처 추가
 	public int addContact(ContactInfoVO contact)
 	{
 		int result = m_cDAO.insertContact(contact);
@@ -54,6 +65,7 @@ public class ContactListService
 		return result;
 	}
 	
+	// 연락처 수정
 	public int editContact(ContactInfoVO contact)
 	{
 		int result = m_cDAO.editContact(contact);
@@ -61,6 +73,7 @@ public class ContactListService
 		return result;
 	}
 	
+	// 연락처 삭제
 	public int removeContact(ContactInfoVO contact)
 	{
 		int result = m_cDAO.removeContact(contact);

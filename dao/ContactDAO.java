@@ -21,6 +21,7 @@ public class ContactDAO // db access object
 	
 	private Connection conn = null;
 
+	// region connection
 	private Connection getConnection()
 	{
 		conn = null;
@@ -71,6 +72,7 @@ public class ContactDAO // db access object
 			e.printStackTrace();
 		}
 	}
+	// endregion connection
 
 	//region - Create Table
 	// 만약 첫 실행이라 테이블이 없다면 테이블들 생성 및 제약조건 지정
@@ -86,7 +88,7 @@ public class ContactDAO // db access object
 			sql.append("CREATE TABLE CONTACTLIST							");
 			sql.append("(													");
 			sql.append("		memberid		NUMBER						");
-			sql.append("	,	name            VARCHAR2(50)     NOT NULL	");
+			sql.append("	,	name            VARCHAR2(50)    NOT NULL	");
 			sql.append("	,   phone           VARCHAR2(15)				");
 			sql.append("	,   address         VARCHAR2(50)    NOT NULL	");
 			sql.append("	,   relation_type   VARCHAR2(3)					");
@@ -498,7 +500,6 @@ public class ContactDAO // db access object
 			}
 			else
 			{
-				result = -99;
 				Logger.getGlobal().warning("연락처 추가 도중 문제가 발생하였습니다." + e.getMessage());	
 			}
 		}
@@ -556,7 +557,6 @@ public class ContactDAO // db access object
 			}
 			else
 			{
-				result = -99;
 				Logger.getGlobal().warning("연락처 수정 도중 문제가 발생했습니다." + e.getMessage());
 			}
 		}
@@ -600,7 +600,6 @@ public class ContactDAO // db access object
 		catch (SQLException e)
 		{
 			Logger.getGlobal().warning("연락처 삭제 도중 문제가 발생했습니다."+ e.getMessage());
-			result = -99;
 		}
 		finally
 		{
