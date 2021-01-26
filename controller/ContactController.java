@@ -541,7 +541,7 @@ public class ContactController
 									
 									if(!isExist)
 									{
-										m_service.addRelationType(relation_name);
+										m_viewer.checkResult(m_service.addRelationType(relation_name));
 										relation_type = String.format("%03d", relations.size()+1);
 									}
 									else

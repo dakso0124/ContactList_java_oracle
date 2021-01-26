@@ -83,6 +83,7 @@ public class ContactDAO // db access object
 		PreparedStatement pstmt = null;
 
 		StringBuilder sql = new StringBuilder();
+		
 		try
 		{
 			sql.append("CREATE TABLE CONTACTLIST							");
@@ -94,9 +95,10 @@ public class ContactDAO // db access object
 			sql.append("	,   relation_type   VARCHAR2(3)					");
 			sql.append("	,   join_date       CHAR(8)						");
 			sql.append(")													");
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST 테이블 생성에 성공했습니다.");
+			System.out.println("CONTACTLIST 테이블을 생성했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -129,9 +131,11 @@ public class ContactDAO // db access object
 			sql.append("		relation_type   VARCHAR2(3)					");
 			sql.append("	,   relation_name   VARCHAR2(50)				");
 			sql.append(")													");
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("RELATION 테이블 생성에 성공했습니다.");
+			
+			System.out.println("RELATION 테이블을 생성했습니다.");
 		} 
 		catch (SQLTimeoutException e)
 		{
@@ -160,11 +164,14 @@ public class ContactDAO // db access object
 		{
 			conn = getConnection();
 			pstmt = null;
+			
 			sql.append("ALTER TABLE CONTACTLIST											");
 			sql.append("  ADD CONSTRAINT pk_contactlist_memberid PRIMARY KEY(memberid)	");
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST memberid column PK 지정에 성공했습니다.");
+			
+			System.out.println("CONTACTLIST memberid column PK 지정했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -193,11 +200,14 @@ public class ContactDAO // db access object
 		{
 			conn = getConnection();
 			pstmt = null;
-			sql.append("ALTER TABLE CONTACTLIST										");
+			
+			sql.append("ALTER TABLE CONTACTLIST									");
 			sql.append("  ADD CONSTRAINT uk_contactlist_phone UNIQUE (phone)	");
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST phone column UK 지정에 성공했습니다.");
+			
+			System.out.println("CONTACTLIST phone column UK 지정했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -226,9 +236,11 @@ public class ContactDAO // db access object
 		{
 			sql.append("ALTER TABLE RELATION													");
 			sql.append("  ADD CONSTRAINT pk_relation_relation_type PRIMARY KEY(relation_type)	");
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("RELATION relation_type column PK 지정에 성공했습니다.");
+			
+			System.out.println("RELATION relation_type column PK 지정했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -258,9 +270,11 @@ public class ContactDAO // db access object
 			sql.append("ALTER TABLE CONTACTLIST														");
 			sql.append("  ADD CONSTRAINT fk_contactlist_relation_type FOREIGN KEY(relation_type)	");
 			sql.append("REFERENCES RELATION(relation_type)											");
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.executeUpdate();
-			System.out.println("CONTACTLIST relation_type FK - RELATION relation_type Reference 지정에 성공했습니다.");
+			
+			System.out.println("CONTACTLIST relation_type FK - RELATION relation_type Reference 지정했습니다.");
 		}
 		catch (SQLTimeoutException e)
 		{
@@ -297,7 +311,9 @@ public class ContactDAO // db access object
 		{
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, typeName);
-			result = pstmt.executeUpdate();
+			
+			if(pstmt.executeUpdate() > 0)
+				result = 4;
 		}
 		catch (SQLTimeoutException e)
 		{

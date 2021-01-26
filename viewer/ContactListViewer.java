@@ -53,6 +53,9 @@ public class ContactListViewer {
 			case 3:
 				System.out.println("연락처를 삭제했습니다.");
 				break;
+			case 4:
+				System.out.println("그룹을 추가했습니다.");
+				break;
 			case -1:
 				System.out.println("입력하신 정보중 너무 길게 작성하신 정보가 있습니다.");
 				break;
